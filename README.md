@@ -1,32 +1,38 @@
 # Introduction
 This training framework is made for A WZ->lvll VBS resonance selection using neural networks/BDT.
 
-# How to download
-`git clone https://gitlab.cern.ch/mociduki/WZ_VBS_NN.git WZ_VBS_NN_test`
-`cd WZ_VBS_NN_test`
+## How to download & initial setup
+```
+git clone https://gitlab.cern.ch/mociduki/WZ_VBS_NN.git WZ_VBS_NN_test
+cd WZ_VBS_NN_test/Inputs/
+ln -s /lcg/storage16/atlas/mociduki/lvll_samples/hybrid_20200427
+ln -s hybrid_20200427 MVA
+cd ..
+. setup.sh
+```
 
-# How to setup
-After each time you login and come down into this directory, you need to setup the necessary environment as following:
+## How to setup each time
+At every time you login and come down into this working directory, you need to setup the necessary environment as following:
+```
+. setup.sh
+```
 
-`. setup.sh`
+### Configuration of trainings
+Training configuration is stored inside this python script: config_OPT_NN.py <br>
+It contains all relevant settings like:
+* hyper-parameters
+* list of input variables
+* list of samples used for backgrounds and signals
+The NN models are implemented using the Keras package.
+The training dataset used is a set of simple ntuples, containing all the necessary variables like Mjj, Detajj etc.
 
-# Configure your trainings
-There are two pythno configuration files for both NN and BDT:
-* config_OPT_NN.py:
-* OPT_VBS_NN.py:
+### Samples
+* Backgrounds: Your background is a combination of the SM WZ QCD and WZ EW processes.
+* Signals: You can choose either of the following as your signal:
+  * the combined GM H5 samples with masses ranging from 200 to 900 GeV
+  * the HVT signal samples ranging from 250 to 1000 GeV
 
-They both contain all relevant hyper-parameters (some dedicated for each classifier) and a list of input variables as well as the list of samples used for backgrounds and signals.
-
-Trained with signals and backgrounds, the NN are implemented using the Keras package.
-They need simple ntuples as inputs containing all the necessary variables like Mjj, Detajj etc.
-### background samples
-Your background is a combination of the SM WZ QCD and WZ EW processes.
-
-### signal samples
-You can choose either of the following as your signal:
-* the combined GM H5 samples with masses ranging from 200 to 900 GeV
-* the HVT signal samples ranging from 250 to 1000 GeV
-
+### General configuration of the network
 This is a simple fully connected NN, the principal hyper parameters are:
 * the number of layers
 * number of neurons per layer
@@ -39,10 +45,12 @@ Each signal mass is assigned a label corresponding to the resonance mass.
 The background events have a randomnly assigned label, taken of the same probability distribution as the signals.
 This should allow an optimal performance for all resonance masses. All Hyperparameters can be specified (see help).
 
-# Run NN training
+# Run training & application
+## Run NN training
 An example of commandline to run the training looks like below.
-
-`python3 OPT_VBS_NN.py --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=300 --numlayer=2 --epochs=100 --Findex 0 --nFold 4`
+```
+python3 OPT_VBS_NN.py --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=300 --numlayer=2 --epochs=100 --Findex 0 --nFold 4
+```
 
 where booldropout, dropout, lr, patience, numn, numlayer, and epochs are the hyper-parameters in NN.
 The hyper-parameters in the above example correspond to the result of the preliminary scan done by Benjamin.
@@ -54,8 +62,9 @@ The Findex runs from 0 to nFold-1, so in this example from 0 to 3.
 
 # Applying the NN to all the ntuples
 An example of commandline to run the application looks like below.
-
-`python3 Apply_NN.py --input sigvalid_GM_S1.798_CVp0.048660_F0o4_NN.h5,sigvalid_GM_S1.778_CVp0.047461_F1o4_NN.h5,sigvalid_GM_S1.794_CVp0.049493_F2o4_NN.h5,sigvalid_GM_S1.788_CVp0.049410_F3o4_NN.h5`
+```
+python3 Apply_NN.py --input sigvalid_GM_S1.798_CVp0.048660_F0o4_NN.h5,sigvalid_GM_S1.778_CVp0.047461_F1o4_NN.h5,sigvalid_GM_S1.794_CVp0.049493_F2o4_NN.h5,sigvalid_GM_S1.788_CVp0.049410_F3o4_NN.h5
+```
 
 This applies the trained NN selection to the entire dataset.
 It takes the inputs of the models (h5 files), produced by the training in each fold of the cross-validtion, 
