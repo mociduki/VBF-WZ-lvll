@@ -5,8 +5,8 @@ This training framework is made for A WZ->lvll VBS resonance selection using neu
 ```
 git clone https://gitlab.cern.ch/mociduki/WZ_VBS_NN.git WZ_VBS_NN_test
 cd WZ_VBS_NN_test/Inputs/
-ln -s /lcg/storage16/atlas/mociduki/lvll_samples/20200324
-ln -s 20200324 MVA
+ln -s /lcg/storage16/atlas/mociduki/lvll_samples/hybrid_20200427
+ln -s hybrid_20200427 MVA
 cd ..
 . setup.sh
 ```
