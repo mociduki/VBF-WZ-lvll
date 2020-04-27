@@ -8,10 +8,11 @@ class input_samples:
     #Fraction used for training 
     valfrac = 0.1
     #Directory where ntuples are located
-    filedir = Filedir+"/"#+"main"
+    filedir = Filedir+"/"+"main"
     #Bkg Samples
     bckgr = {
-        'name' : ['MVA.364253_Sherpa_222_NNPDF30NNLO_lllv_ntuples.root', 
+        'name' : [ #'MVA.364253_Sherpa_222_NNPDF30NNLO_lllv_ntuples.root', 
+                  'MVA.361292_MGaMcAtNloPy8EG_NNPDF30LO_A14NNPDF23LO_WZ_lvll_FxFx_ntuples.root',
                   'MVA.364284_Sherpa_222_NNPDF30NNLO_lllvjj_EW6_ntuples.root'],
         'xs' : [4579., 47.],
         'nevents' : [75259300, 7325000]
