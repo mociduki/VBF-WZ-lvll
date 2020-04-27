@@ -1,0 +1,11 @@
+#python3 Apply_NN.py --input sigvalid_GM_S4.024_CVp0.359901_F0o4_NN.h5,sigvalid_GM_S4.047_CVp0.394749_F1o4_NN.h5,sigvalid_GM_S3.985_CVp0.386814_F2o4_NN.h5,sigvalid_GM_S3.989_CVp0.387113_F3o4_NN.h5
+#python3 Apply_NN.py --input sigvalid_GM_S3.217_CVp0.124235_F0o4_NN.h5,sigvalid_GM_S3.174_CVp0.125468_F1o4_NN.h5,sigvalid_GM_S3.222_CVp0.132603_F2o4_NN.h5,sigvalid_GM_S3.268_CVp0.136593_F3o4_NN.h5
+#python3 Apply_NN.py --input sigvalid_GM_S2.667_CVp0.067313_F0o4_NN.h5,sigvalid_GM_S2.589_CVp0.069778_F1o4_NN.h5,sigvalid_GM_S2.671_CVp0.071769_F2o4_NN.h5,sigvalid_GM_S2.63_CVp0.073040_F3o4_NN.h5
+#python3 Apply_NN.py --input sigvalid_GM_S1.553_CVp0.027728_F0o4_NN.h5,sigvalid_GM_S1.533_CVp0.026904_F1o4_NN.h5,sigvalid_GM_S1.564_CVp0.024159_F2o4_NN.h5,sigvalid_GM_S1.54_CVp0.023743_F3o4_NN.h5
+#python3 Apply_NN.py --input sigvalid_GM_S2.098_CVp0.036178_F0o4_NN.h5,sigvalid_GM_S2.105_CVp0.046993_F1o4_NN.h5,sigvalid_GM_S2.087_CVp0.037486_F2o4_NN.h5,sigvalid_GM_S2.031_CVp0.043739_F3o4_NN.h5 # up to 300 GeV only
+#python3 Apply_NN.py --input sigvalid_GM_S2.078_CVp0.038969_F0o4_NN.h5,sigvalid_GM_S2.065_CVp0.044973_F1o4_NN.h5,sigvalid_GM_S2.092_CVp0.042563_F2o4_NN.h5,sigvalid_GM_S2.03_CVp0.034414_F3o4_NN.h5 #w/o lepton properrties
+#python3 Apply_NN.py --input sigvalid_GM_S1.822_CVp0.045801_F0o4_NN.h5,sigvalid_GM_S1.802_CVp0.047234_F1o4_NN.h5,sigvalid_GM_S1.828_CVp0.048131_F2o4_NN.h5,sigvalid_GM_S1.83_CVp0.047117_F3o4_NN.h5 #w/o Pt_W and Pt_Z
+#python3 Apply_NN.py --input sigvalid_GM_S1.794_CVp0.047849_F0o4_NN.h5,sigvalid_GM_S1.771_CVp0.049478_F1o4_NN.h5,sigvalid_GM_S1.815_CVp0.046301_F2o4_NN.h5,sigvalid_GM_S1.782_CVp0.044716_F3o4_NN.h5 #including back the lepton etas
+#python3 Apply_NN.py --input sigvalid_GM_S2.296_CVp0.123257_F0o4_NN.h5,sigvalid_GM_S2.22_CVp0.126297_F1o4_NN.h5,sigvalid_GM_S2.235_CVp0.134495_F2o4_NN.h5,sigvalid_GM_S2.293_CVp0.120587_F3o4_NN.h5 #now trained up to 400 GeV
+#python3 Apply_NN.py --input sigvalid_GM_S2.056_CVp0.089481_F0o4_NN.h5,sigvalid_GM_S2.042_CVp0.088177_F1o4_NN.h5,sigvalid_GM_S2.082_CVp0.089772_F2o4_NN.h5,sigvalid_GM_S2.055_CVp0.085312_F3o4_NN.h5 #now trained up to 350 GeV
+python3 Apply_NN.py --input sigvalid_GM_S1.798_CVp0.048660_F0o4_NN.h5,sigvalid_GM_S1.778_CVp0.047461_F1o4_NN.h5,sigvalid_GM_S1.794_CVp0.049493_F2o4_NN.h5,sigvalid_GM_S1.788_CVp0.049410_F3o4_NN.h5 #with Eta_W, Eta_Z
