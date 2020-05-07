@@ -11,11 +11,11 @@ class input_samples:
     filedir = Filedir+"/"+"main"
     #Bkg Samples
     bckgr = {
-        'name' : [ #'MVA.364253_Sherpa_222_NNPDF30NNLO_lllv_ntuples.root', 
-                  'MVA.361292_MGaMcAtNloPy8EG_NNPDF30LO_A14NNPDF23LO_WZ_lvll_FxFx_ntuples.root',
-                  'MVA.364284_Sherpa_222_NNPDF30NNLO_lllvjj_EW6_ntuples.root'],
-        'xs' : [4579., 47.],
-        'nevents' : [75259300, 7325000]
+        'name' : [ #'MVA.364253_Sherpa_222_NNPDF30NNLO_lllv_ntuples.root', # 4579.,75259300
+                   'MVA.361292_MGaMcAtNloPy8EG_NNPDF30LO_A14NNPDF23LO_WZ_lvll_FxFx_ntuples.root',
+                   'MVA.364284_Sherpa_222_NNPDF30NNLO_lllvjj_EW6_ntuples.root'],
+        'xs' : [1704., 47.],
+        'nevents' : [3890000, 7325000]
     }
 
     #Signal Samples
@@ -55,18 +55,25 @@ class input_samples:
         'nevents' : [190000,190000,190000,190000,190000,190000,190000,175000,190000,160000,160000]
     }
     #Variables used for training
-    variables = ['M_jj','Deta_jj','Jet1Pt', 'Jet2Pt',
-                 'Jet1Eta','Jet2Eta','Jet1E','Jet2E',
-                 ###Lepton related variables
+    variables = ['M_jj','Deta_jj', 'Dphi_jj',
+                 'Jet1Pt', 'Jet2Pt',
+                 'Jet1Eta','Jet2Eta',
+                 'Jet1E','Jet2E',
+                 'Jet3Eta', #added
                  #'Lep1Pt', 'Lep2Pt','Lep3Pt', ### removed to reduce mass dependence
-                 'Lep1Eta','Lep2Eta', 'Lep3Eta',
-                 ###WZ properties
+                 'Lep1Eta','Lep2Eta', 'Lep3Eta', 
                  'PtBalanceZ','PtBalanceW',
-                 #'Pt_W', 'Pt_Z', ### removed to reduce mass dependence
-                 'Eta_W', 'Eta_Z',
+                 #'Pt_W', 'Pt_Z',  ### removed to reduce mass dependence
+                 'Eta_W', 'Eta_Z', ### added instead
                  'ZetaLep','Njets','Met']
-#No 3rd jet
-#                     'm_Pt_jet3',,'m_Eta_jet3''m_E_jet3',
+
+    #original set
+    #variables = ['M_jj','Deta_jj',
+    #             'Jet1Pt', 'Jet2Pt', 'Jet1Eta','Jet2Eta', 'Jet1E','Jet2E',
+    #             'Lep1Pt', 'Lep2Pt', 'Lep3Pt', 'Lep1Eta','Lep2Eta','Lep3Eta',
+    #             'PtBalanceZ','PtBalanceW',
+    #             'Pt_W', 'Pt_Z', 
+    #             'ZetaLep','Njets','Met']
 
 #Contains list of samples to apply NN
 class apply_samples:
