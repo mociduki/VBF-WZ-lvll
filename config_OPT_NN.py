@@ -25,7 +25,7 @@ class input_samples:
         'name' : ['MVA.305028_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_200_qcd0_ntuples.root',
                   'MVA.309500_MadGraphPythia8EvtGen_A14NNPDF23LO_VBSWZlvlljj_m250_ISH0p5_ntuples.root',
                   'MVA.305029_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_300_qcd0_ntuples.root', #down to here it's working for all mass points
-                  'MVA.309501_MadGraphPythia8EvtGen_A14NNPDF23LO_VBSWZlvlljj_m350_ISH0p5_ntuples.root',
+                  'MVA.309501_MadGraphPythia8EvtGen_A14NNPDF23LO_VBSWZlvlljj_m350_ISH0p5_ntuples.root', #sesms like the threshold is here now
                   'MVA.305030_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_400_qcd0_ntuples.root',
                   'MVA.309498_MadGraphPythia8EvtGen_A14NNPDF23LO_VBSWZlvlljj_m450_ISH0p5_ntuples.root',
                   'MVA.305031_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_500_qcd0_ntuples.root',
@@ -34,25 +34,33 @@ class input_samples:
                   'MVA.305034_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_800_qcd0_ntuples.root',
                   'MVA.305035_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_900_qcd0_ntuples.root'
                   ],
-        'xs' : [1.765,1.4911,0.98095,0.8874,0.6107,0.6391,0.4028,0.2751,0.1934,0.1386,0.1010],
-        'nevents' : [160000,160000,160000,280000,160000,160000,160000,160000,160000,160000,160000]
+        # mass           200,    250,     300,    350,    400,    450,    500,    600,    700,    800,    900
+        #'xs'      : [1.765 , 1.4911, 0.98095, 0.8874, 0.6107, 0.6391, 0.4028, 0.2751, 0.1934, 0.1386, 0.1010],
+        #'nevents' : [160000, 160000,  160000, 280000, 160000, 160000, 160000, 160000,  160000,  160000,  160000 ],
+        'xs'      : [7.0596,  7.710,  3.9238,  4.582, 2.4428,  2.95, 1.6113, 1.1005, 0.77398, 0.55433, 0.40394 ],
+        'nevents' : [ 70000,  70000,   70000, 190000,  70000,  70000,  70000,  70000,   70000,   70000,   50000 ],
+        'filtEff' : [     1,0.77156,       1,0.77507,      1,0.77891,      1,      1,       1,       1,       1 ],
+        'switch'  : [     1,      1,       1,      1,      0,      0,      0,      0,       0,       0,       0 ]
     }
     #HVT signal files
     sigHVT = {
         'name' : ['MVA.307730_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0250_ntuples.root',
                   'MVA.307731_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0300_ntuples.root',
+                  'MVA.309528_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0350_ntuples.root',
                   'MVA.307732_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0400_ntuples.root',
+                  'MVA.309529_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0450_ntuples.root'
                   'MVA.307733_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0500_ntuples.root',
                   'MVA.307734_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0600_ntuples.root',
                   'MVA.307735_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0700_ntuples.root',
                   'MVA.307736_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0800_ntuples.root',
                   'MVA.307737_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0900_ntuples.root',
                   'MVA.307738_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m1000_ntuples.root',
-                  'MVA.309528_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0350_ntuples.root',
-                  'MVA.309529_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0450_ntuples.root'
                   ],
-        'xs' : [24.42,10.54,2.299,0.7975,0.3408,0.1663,0.087984,0.049882,0.02961,1.3050,4.4843],
-        'nevents' : [190000,190000,190000,190000,190000,190000,190000,175000,190000,160000,160000]
+        #               200,    250,    300,    350,    400,    450,      500,      600,     700,    800,    900
+        'xs'      : [24.42 , 10.54 , 2.299 , 0.7975, 0.3408, 0.1663, 0.087984, 0.049882, 0.02961, 1.3050, 4.4843],
+        'nevents' : [190000, 190000, 190000, 190000, 190000, 190000,   190000,   175000,  190000, 160000, 160000],
+        'filtEff' : [     1,      1,      1,      1,      1,      1,       1,         1,       1,      1,      1],
+        'switch'  : [     1,      1,      1,      1,      0,      0,        0,        0,       0,      0,      0]
     }
     #Variables used for training
     variables = ['M_jj','Deta_jj', 'Dphi_jj',
@@ -65,7 +73,8 @@ class input_samples:
                  'PtBalanceZ','PtBalanceW',
                  #'Pt_W', 'Pt_Z',  ### removed to reduce mass dependence
                  'Eta_W', 'Eta_Z', ### added instead
-                 'ZetaLep','Njets','Met']
+                 'ZetaLep','Njets' #,'Met'
+                 ]
 
     #original set
     #variables = ['M_jj','Deta_jj',
