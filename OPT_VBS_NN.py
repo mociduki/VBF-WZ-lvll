@@ -16,7 +16,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import math
 from root_numpy import root2array, tree2array, array2root
-from common_function import dataset, AMS, read_data, prepare_data, drawfigure, calc_sig, f1, f1_loss
+from common_function import dataset, AMS, read_data, prepare_data, drawfigure, calc_sig, calc_sig_new, f1, f1_loss
 import config_OPT_NN as conf
 import ROOT 
 
@@ -155,13 +155,14 @@ if __name__ == '__main__':
 
     #Calculate significance in output range between lower and upper
     lower=55 # means 36% from the right side
-    upper=70 # means 22% from the right side
+    upper=75 # means 22% from the right side
     massindex=0
     mass=200
     step = 1
     
-    highsig,cut_value = calc_sig(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], lower, upper, step, mass, massindex,'NN', args.output, args.model,args.Findex,args.nFold)
-
+    highsig,cut_value = calc_sig_new(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], mass, '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold) )
+    #highsig,cut_value = calc_sig(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], lower, upper, step, mass, massindex, '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold) )
+    
     # Draw figures
     drawfigure(model,prob_predict_train_NN,data_set,data_set.X_valid.values,nameadd,cut_value,args.Findex,args.nFold)
 
