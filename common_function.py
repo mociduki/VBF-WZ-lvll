@@ -17,16 +17,24 @@ def AMS(s, b):
                 2 { (s + b + b_r) log[1 + (s/(b+b_r))] - s}
               )        
     where b_r = 0.00001, b = background, s = signal, log is natural logarithm with added systematics"""
+
+    debug=False
+
+    if debug: print("s, b=",s,"\t",b)
     
-    br = 0.00001
+    br = 0.00001 #KM: systematic unc?
     sigma=math.sqrt(b+br)
     n=s+b+br
     radicand = 2 *( n * math.log (n*(b+br+sigma)/(b**2+n*sigma+br))-b**2/sigma*math.log(1+sigma*(n-b)/(b*(b+br+sigma))))
-    if radicand < 0:
-        print('radicand is negative. Exiting')
-        exit()
+
+    significance= 0
+    if radicand < 0: 
+        if debug: print('AMS: radicand is negative. Returning 0.')
     else:
-        return math.sqrt(radicand)
+        significance= math.sqrt(radicand)
+        pass
+    
+    return significance
 
 def read_data_apply(filepath, X_mean, X_dev, Label, variables,model,Findex=0,nFold=1):
     data = read_data(filepath,Findex,nFold)
@@ -78,8 +86,8 @@ class dataset:
         self.mass_valid=mass_valid.reset_index(drop=True)
         #self.mass_test=mass_test.reset_index(drop=True)
 
-        self.W_train=train[['Weight']]
-        self.W_valid=validation[['Weight']]
+        self.W_train=train[['WeightNormalized']]
+        self.W_valid=validation[['WeightNormalized']]
         #self.W_test=test[['Weight']]
 
         X_train = train[variables]
@@ -124,7 +132,7 @@ def prepare_data(input_samples,model,Findex,nFold):
     for i in range(len(namesbkg)):
         sample = read_data(input_samples.filedir+namesbkg[i],Findex,nFold)
         print(namesbkg[i])
-        sample['Weight']=sample['Weight']*input_samples.lumi*xsbkg[i]/neventsbkg[i]
+        #sample['Weight']=sample['Weight']*input_samples.lumi*xsbkg[i]/neventsbkg[i] #KM: This is done in WeightNormalized
         if bg is None:
             bg=sample
         else:
@@ -137,13 +145,31 @@ def prepare_data(input_samples,model,Findex,nFold):
     #Read signal
     #Either GM or HVT model
     if model=='GM':
-        namessig = input_samples.sigGM["name"]
-        xssig = input_samples.sigGM["xs"]
-        neventssig = input_samples.sigGM["nevents"]
+        switches   = input_samples.sigGM["switch" ]
+        namessig   = list() #input_samples.sigGM["name"   ]
+        xssig      = list() #input_samples.sigGM["xs"     ]
+        neventssig = list() #input_samples.sigGM["nevents"]
+        for i in range(len(switches)):
+            if not switches[i]: continue
+            namessig   .append( input_samples.sigGM["name"   ][i] )
+            xssig      .append( input_samples.sigGM["xs"     ][i] )
+            neventssig .append( input_samples.sigGM["nevents"][i] )
+            pass
+        #print(namessig,len(namessig))
+
     elif model=='HVT':
-        namessig = input_samples.sigHVT["name"]
-        xssig = input_samples.sigHVT["xs"]
-        neventssig = input_samples.sigHVT["nevents"]
+        switches   = input_samples.sigHVT["switch" ]
+        namessig   = list() #input_samples.sigHVT["name"   ]
+        xssig      = list() #input_samples.sigHVT["xs"     ]
+        neventssig = list() #input_samples.sigHVT["nevents"]
+        for i in range(len(switches)):
+            if not switches[i]: continue
+            namessig   .append( input_samples.sigHVT["name"   ][i] )
+            xssig      .append( input_samples.sigHVT["xs"     ][i] )
+            neventssig .append( input_samples.sigHVT["nevents"][i] )
+            pass
+        #print(namessig,len(namessig))
+
     else :
         raise NameError('Model needs to be either GM or HVT')
     sig = None
@@ -152,7 +178,7 @@ def prepare_data(input_samples,model,Findex,nFold):
     for i in range(len(namessig)):
         sample = read_data(input_samples.filedirsig+namessig[i],Findex,nFold)
         print(namessig[i])
-        sample['Weight']=sample['Weight']*input_samples.lumi*xssig[i]/neventssig[i]
+        #sample['Weight']=sample['Weight']*input_samples.lumi*xssig[i]/neventssig[i]  #KM: This is done in WeightNormalized
         sample['LabelMass'] = i
         prob[i] = sample.shape[0] 
         if sig is None:
@@ -253,11 +279,163 @@ def drawfigure(model,prob_predict_train_NN,data,X_test,nameadd,cut_value,Findex,
     plt.clf() 
 
 
-def calc_sig(data_set,prob_predict_train, prob_predict_valid,lower,upper,step,mass,massindex,mod,name,model,Findex,nFold):
+def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,mass,file_string):
+    nFold = int(file_string[len(file_string)-1:])
+    
+    #                       # to be consistent with Benjamin
+    apply_mass_window=True  #True # apply mass window cut for calculation
+    apply_trva_norm  =True  #True # training vs validation normalization
+    use_abs_weight   =True  #True # flip the negative event weights from generator
+    do_single_mass   =(mass>0)  #True # evaluate the singificance using one mass point or not
+    debug = False
+
+    mass_idx=-1 #default for 200GeV
+    if   mass==200: mass_idx=0
+    elif mass==250: mass_idx=1
+    elif mass==300: mass_idx=2
+    elif mass==350: mass_idx=3
+    elif mass==400: mass_idx=4
+    elif mass==450: mass_idx=5
+    elif mass==500: mass_idx=6
+    elif mass==600: mass_idx=7
+    elif mass==700: mass_idx=8
+    elif mass==800: mass_idx=9
+    elif mass==900: mass_idx=10
+
+    num_train=len(prob_predict_train)
+    num_valid=len(prob_predict_valid)
+    num_tot=num_train+num_valid
+
+    #label for sig=0, bkg=1
+    label_train = np.reshape(data_set.y_train.values, (len(data_set.y_train.values),))
+    label_valid = np.reshape(data_set.y_valid.values, (len(data_set.y_valid.values),))
+
+    #mass label for 200GeV=0, 900GeV=10
+    mlabel_train = np.reshape(data_set.mass_train_label.values, (len(data_set.mass_train_label.values),))
+    mlabel_valid = np.reshape(data_set.mass_valid_label.values, (len(data_set.mass_valid_label.values),))
+
+    mWZ_train = np.reshape(data_set.mass_train.values, (len(data_set.mass_train.values),))
+    mWZ_valid = np.reshape(data_set.mass_valid.values, (len(data_set.mass_valid.values),))
+
+    #sample weight including #generated events & x-section
+    weight_train = np.reshape(data_set.W_train.values, (len(data_set.W_train.values),)).copy()
+    weight_valid = np.reshape(data_set.W_valid.values, (len(data_set.W_valid.values),)).copy()
+
+    #KM: these two lines below are necessary to normalized the number of events that are significantly different in the training and validation samples
+    if apply_trva_norm:
+        weight_train *= num_tot/float(num_train)
+        weight_valid *= num_tot/float(num_valid)
+        pass
+
+    if use_abs_weight:
+        weight_train = abs(weight_train)
+        weight_valid = abs(weight_valid)
+        pass
+
+    print( "Nevents(train), Nevents(valid)= ",len(label_train), len(label_valid))
+
+    indices_tr_s = np.where( label_train=='1' )[0]
+    indices_tr_b = np.where( label_train=='0' )[0]
+    indices_va_s = np.where( label_valid=='1' )[0]
+    indices_va_b = np.where( label_valid=='0' )[0]
+
+    if do_single_mass:
+        indices_tr_s = np.where((label_train=='1') & (mlabel_train==mass_idx))[0]
+        indices_tr_b = np.where( label_train=='0'                            )[0]
+        indices_va_s = np.where((label_valid=='1') & (mlabel_valid==mass_idx))[0]
+        indices_va_b = np.where( label_valid=='0'                            )[0]
+        if apply_mass_window:
+            indices_tr_s = np.where( (label_train=='1') & (mass-mass*0.08*1.5<mWZ_train) & (mWZ_train<mass+mass*0.08*1.5) & (mlabel_train==mass_idx) )[0]
+            indices_tr_b = np.where( (label_train=='0') & (mass-mass*0.08*1.5<mWZ_train) & (mWZ_train<mass+mass*0.08*1.5)                            )[0]
+            indices_va_s = np.where( (label_valid=='1') & (mass-mass*0.08*1.5<mWZ_valid) & (mWZ_valid<mass+mass*0.08*1.5) & (mlabel_valid==mass_idx) )[0]
+            indices_va_b = np.where( (label_valid=='0') & (mass-mass*0.08*1.5<mWZ_valid) & (mWZ_valid<mass+mass*0.08*1.5)                            )[0]
+            pass
+        pass
+    
+    p_tr_s = prob_predict_train[indices_tr_s] #sig training sample
+    p_tr_b = prob_predict_train[indices_tr_b] #bkg training sample
+    p_va_s = prob_predict_valid[indices_va_s] #sig validation sample
+    p_va_b = prob_predict_valid[indices_va_b] #bkg validation sample
+
+    w_tr_s = weight_train[indices_tr_s] #sig training sample
+    w_tr_b = weight_train[indices_tr_b] #bkg training sample
+    w_va_s = weight_valid[indices_va_s] #sig validation sample
+    w_va_b = weight_valid[indices_va_b] #bkg validation sample
+
+    nbins=1000
+    
+    #define nPoints for graphing
+    graph_points_tr_x=np.zeros(nbins)
+    #graph_points_va_x=np.zeros(nbins) # same as above
+    graph_points_tr_y=np.zeros(nbins)
+    graph_points_va_y=np.zeros(nbins)
+
+    #histograming
+    counts_tr_s,bins,_=plt.hist(p_tr_s,bins=nbins,range=(0,1),weights=w_tr_s)  #    print(np.shape(p_tr_s),np.shape(w_tr_s))
+    counts_tr_b,   _,_=plt.hist(p_tr_b,bins=nbins,range=(0,1),weights=w_tr_b)  #    print(np.shape(p_tr_b),np.shape(w_tr_b))
+    counts_va_s,   _,_=plt.hist(p_va_s,bins=nbins,range=(0,1),weights=w_va_s)  #    print(np.shape(p_va_s),np.shape(w_va_s))
+    counts_va_b,   _,_=plt.hist(p_va_b,bins=nbins,range=(0,1),weights=w_va_b)  #    print(np.shape(p_va_b),np.shape(w_va_b))
+
+    print("TRAIN: nbins=",len(counts_tr_s),",\tNsig,Nbkg=",np.sum(counts_tr_s),"\t",np.sum(counts_tr_b), ",\tNsig+Nbkg=",np.sum(counts_tr_s)+np.sum(counts_tr_b))
+    print("VALID: nbins=",len(counts_va_s),",\tNsig,Nbkg=",np.sum(counts_va_s),"\t",np.sum(counts_va_b), ",\tNsig+Nbkg=",np.sum(counts_va_s)+np.sum(counts_va_b))
+
+    Nsig_init, sig_yeild, sig_eff, largestAMS, cut_w_maxAMS=0,0,0,0,0
+    for i in range(len(counts_tr_s)):
+        indices2sum = list(range(i,len(counts_tr_s)))
+
+        Nsig_tr=counts_tr_s[indices2sum].sum()
+        Nbkg_tr=counts_tr_b[indices2sum].sum()
+        Nsig_va=counts_va_s[indices2sum].sum()
+        Nbkg_va=counts_va_b[indices2sum].sum()
+
+        if i==0: Nsig_init=Nsig_va
+        #if Nsig_va*nFold<1: continue # if the number of signal events (expected without x-validation) left after cut < 1, skip the rest
+
+        # negative weights to be positive
+        #        if Nsig_tr<0:Nsig_tr=abs(Nsig_tr)
+        #        if Nbkg_tr<0:Nbkg_tr=abs(Nbkg_tr)
+        #        if Nsig_va<0:Nsig_va=abs(Nsig_va)
+        #        if Nbkg_va<0:Nbkg_va=abs(Nbkg_va)
+        
+        significance_tr=0
+        significance_va=0
+
+        if Nsig_tr>0 and Nbkg_tr>0:significance_tr= AMS(Nsig_tr*nFold ,Nbkg_tr*nFold)
+        if Nsig_va>0 and Nbkg_va>0:significance_va= AMS(Nsig_va*nFold ,Nbkg_va*nFold)
+
+        if debug:
+            print("Bin#\t",i)
+            print("tr: s, b, sig=", Nsig_tr,"\t", Nbkg_tr,"\t",significance_tr)
+            print("va: s, b, sig=", Nsig_va,"\t", Nbkg_va,"\t",significance_va)
+            pass
+        
+        if significance_va>largestAMS: largestAMS, cut_w_maxAMS, sig_yeild, sig_eff= significance_va, bins[i], Nsig_va, Nsig_va/Nsig_init
+
+        graph_points_tr_x[i]=bins[i]
+        graph_points_tr_y[i]=significance_tr
+        graph_points_va_y[i]=significance_va
+        pass
+
+    plt.clf()
+    plt.plot(graph_points_tr_x,graph_points_tr_y, label='train')
+    plt.plot(graph_points_tr_x,graph_points_va_y, label='valid')
+    plt.legend()
+
+    output_file='./ControlPlots/significance_'+file_string+'.png'
+    print("Saving sinificance plot: ",output_file)
+
+    plt.savefig(output_file)
+
+    print("Signal efficiency with cut for best significance: ",sig_eff, ",\t yeilding {} events".format(sig_yeild))
+
+    return largestAMS, cut_w_maxAMS
+
+def calc_sig(data_set,prob_predict_train, prob_predict_valid,lower,upper,step,mass,massindex,file_string):
+    #KM: these are arrays of graph points, to be used later in the plotting section
     AMS_train=np.zeros(((upper-lower)//step,2))
     AMS_valid=np.zeros(((upper-lower)//step,2))
 
-    index2=0
+    index2=0 #KM: indexing of graph points
 
     shape_train=data_set.X_train.shape
     shape_valid=data_set.X_valid.shape
@@ -280,9 +458,16 @@ def calc_sig(data_set,prob_predict_train, prob_predict_valid,lower,upper,step,ma
         s_valid=b_valid=0
 
         for index in range(len(Yhat_train)):
-            if (Yhat_train[index]==1.0 and data_set.y_train.values[index,0]=='1' and data_set.mass_train.iloc[index,0]>mass-mass*0.08*1.5 and data_set.mass_train.iloc[index,0]<mass+mass*0.08*1.5 and data_set.mass_train_label.iloc[index,0]==massindex):
+            if (Yhat_train[index]==1.0 and #predicted to be signal
+                data_set.y_train.values[index,0]=='1' and # label to be a signal
+                data_set.mass_train.iloc[index,0]>mass-mass*0.08*1.5 and # M_WZ to be between a given range
+                data_set.mass_train.iloc[index,0]<mass+mass*0.08*1.5 and # M_WZ to be between a given range 
+                data_set.mass_train_label.iloc[index,0]==massindex):
                 s_train +=  abs(data_set.W_train.iat[index,0]*(num_tot/float(num_train)))
-            elif (Yhat_train[index]==1.0 and data_set.y_train.values[index,0]=='0' and data_set.mass_train.iloc[index,0]>mass-mass*0.08*1.5 and data_set.mass_train.iloc[index,0]<mass+mass*0.08*1.5):
+            elif (Yhat_train[index]==1.0 and
+                  data_set.y_train.values[index,0]=='0' and 
+                  data_set.mass_train.iloc[index,0]>mass-mass*0.08*1.5 and 
+                  data_set.mass_train.iloc[index,0]<mass+mass*0.08*1.5):
                 b_train +=  abs(data_set.W_train.iat[index,0]*(num_tot/float(num_train)))
 
         for index in range(len(Yhat_valid)):
@@ -296,7 +481,7 @@ def calc_sig(data_set,prob_predict_train, prob_predict_valid,lower,upper,step,ma
 
         ams_train=AMS(s_train,b_train)
         ams_valid=AMS(s_valid,b_valid)
-        avg_ams=(ams_train+ams_valid)/2
+        avg_ams=ams_valid#(ams_train+ams_valid)/2
         if avg_ams>largestAMS: largestAMS, cut_w_maxAMS = avg_ams, pcutNN
 
         print('Calculating AMS score for NNs with a probability cutoff pcut=',cut)
@@ -317,10 +502,11 @@ def calc_sig(data_set,prob_predict_train, prob_predict_valid,lower,upper,step,ma
     plt.xlabel("Cut value")
     plt.xlim(0,1)
     plt.ylabel("Significance ($\sigma$)")
-    plt.savefig('./ControlPlots/significance_'+model+'_'+str(mod)+str(name)+('_F{0}o{1}'.format(Findex,nFold))+'.png')
+    plt.savefig('./ControlPlots/significance_'+file_string+'.png')
     plt.clf()
     
-    return AMS_valid[np.argmax(AMS_valid[:,1]),1],cut_w_maxAMS
+    #return AMS_valid[np.argmax(AMS_valid[:,1]),1],cut_w_maxAMS
+    return largestAMS,cut_w_maxAMS
 
 #Atlernative metric to accuracy
 def f1(y_true, y_pred):
