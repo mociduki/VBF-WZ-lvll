@@ -119,7 +119,7 @@ class dataset:
         self.mass_valid_label=validation[['LabelMass']]
         #self.X_test['LabelMass']=test[['LabelMass']]
         
-def prepare_data(input_samples,model,Findex,nFold):
+def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
     #Read background and signal files and save them as panda data frames
 
     #Names of bck samples
@@ -128,7 +128,7 @@ def prepare_data(input_samples,model,Findex,nFold):
     neventsbkg = input_samples.bckgr["nevents"]
     #Read files one by one and normalize weights to 150 fb^-1
     bg = None
-    print('Read Background Samples')
+    print('\nRead Background Samples')
     for i in range(len(namesbkg)):
         sample = read_data(input_samples.filedir+namesbkg[i],Findex,nFold)
         print(namesbkg[i])
@@ -146,6 +146,7 @@ def prepare_data(input_samples,model,Findex,nFold):
     #Either GM or HVT model
     if model=='GM':
         switches   = input_samples.sigGM["switch" ]
+        if len(arg_switches)==len(switches): switches = arg_switches
         namessig   = list() #input_samples.sigGM["name"   ]
         xssig      = list() #input_samples.sigGM["xs"     ]
         neventssig = list() #input_samples.sigGM["nevents"]
@@ -159,6 +160,7 @@ def prepare_data(input_samples,model,Findex,nFold):
 
     elif model=='HVT':
         switches   = input_samples.sigHVT["switch" ]
+        if len(arg_switches)==len(switches): switches = arg_switches
         namessig   = list() #input_samples.sigHVT["name"   ]
         xssig      = list() #input_samples.sigHVT["xs"     ]
         neventssig = list() #input_samples.sigHVT["nevents"]
@@ -174,7 +176,7 @@ def prepare_data(input_samples,model,Findex,nFold):
         raise NameError('Model needs to be either GM or HVT')
     sig = None
     prob = np.empty(len(namessig))
-    print('Read Signal Samples')
+    print('\nRead Signal Samples')
     for i in range(len(namessig)):
         sample = read_data(input_samples.filedirsig+namessig[i],Findex,nFold)
         print(namessig[i])
@@ -207,7 +209,7 @@ def prepare_data(input_samples,model,Findex,nFold):
     # Use 30% of the training sample for validation
 
     data_cont = dataset(data,1.,input_samples.valfrac,input_samples.variables,model)
-    return data_cont
+    return data_cont,switches
 
 #Draws Control plot for Neural Network classification
 def drawfigure(model,prob_predict_train_NN,data,X_test,nameadd,cut_value,Findex,nFold):
@@ -277,16 +279,16 @@ def drawfigure(model,prob_predict_train_NN,data,X_test,nameadd,cut_value,Findex,
     # Save the result to png
     plt.savefig("./ControlPlots/NN_clf_"+nameadd+('_F{0}o{1}'.format(Findex,nFold))+".png")
     plt.clf() 
+    return
 
-
-def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,mass,file_string):
+def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,file_string,mass=200,apply_trva_norm=True,apply_mass_window=False,use_abs_weight=False):
     nFold = int(file_string[len(file_string)-1:])
     
-    #                       # to be consistent with Benjamin
-    apply_mass_window=True  #True # apply mass window cut for calculation
-    apply_trva_norm  =True  #True # training vs validation normalization
-    use_abs_weight   =True  #True # flip the negative event weights from generator
-    do_single_mass   =(mass>0)  #True # evaluate the singificance using one mass point or not
+    # CONTROL FLAGS             #                                                   #To be consistent with Benjamin
+    #apply_mass_window          # apply mass window cut for signif. calculation     #True
+    #apply_trva_norm            # training vs validation normalization              #True
+    #use_abs_weight             # flip the negative event weights from generator    #True
+    do_single_mass   =(mass>0)  # evaluate singificance using one mass point or not #True
     debug = False
 
     mass_idx=-1 #default for 200GeV
@@ -301,6 +303,8 @@ def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,mass,file_strin
     elif mass==700: mass_idx=8
     elif mass==800: mass_idx=9
     elif mass==900: mass_idx=10
+
+    if not do_single_mass: apply_mass_window=False
 
     num_train=len(prob_predict_train)
     num_valid=len(prob_predict_valid)
@@ -421,12 +425,12 @@ def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,mass,file_strin
     plt.plot(graph_points_tr_x,graph_points_va_y, label='valid')
     plt.legend()
 
-    output_file='./ControlPlots/significance_'+file_string+'.png'
+    output_file='./ControlPlots/significance_m{}_'.format(mass)+file_string+'.png'
     print("Saving sinificance plot: ",output_file)
 
     plt.savefig(output_file)
 
-    print("Signal efficiency with cut for best significance: ",sig_eff, ",\t yeilding {} events".format(sig_yeild))
+    print("Signal efficiency with cut for best significance: ",sig_eff, ",\t yeilding {} signal events".format(sig_yeild))
 
     return largestAMS, cut_w_maxAMS
 

@@ -67,6 +67,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', help = "Specifies the number of epochs", default=80, type=int)
     parser.add_argument('--patience', help = "Specifies the patience for early stopping", default=5, type=int)
     parser.add_argument('--no_train', help = "Skip training process", default=False, type=bool)
+    parser.add_argument('--mass_points', help = "mass points to be included in the training", default=list(), type=int,nargs='+')
     parser.add_argument('--nFold', help = "number of folds", default=2, type=int)
     parser.add_argument('--Findex', help = "index in nfolds", default=0, type=int)
 
@@ -79,8 +80,27 @@ if __name__ == '__main__':
     #Additional name from model and hyper parameters
     nameadd=args.output+args.model
 
+    tmp_switches=list() #switches for mass points
+    mass_list = [200,250,300,350,400,450,500,600,700,800,900]
+    if len(args.mass_points)>0:
+        for mass in mass_list: tmp_switches.append(mass in args.mass_points)
+        print("INFO: Overriding the mass switches because the mass_points argument was given!")
+    else: print("INFO: No mass_points argument was given. Using default mass switches in the config_OP_NN.py!")
+
     #Read data files
-    data_set=prepare_data(input_sample,args.model,args.Findex,args.nFold)
+    data_set,tmp_switches=prepare_data(input_sample,args.model,args.Findex,args.nFold,arg_switches=tmp_switches)
+
+    ar_switches = np.array(tmp_switches)
+    ar_mass     = np.array(mass_list)
+    tmp_array = ar_switches*ar_mass
+    args.mass_points = tmp_array.tolist()
+    while args.mass_points[-1]==0: args.mass_points.pop(-1)
+    print(args.mass_points)
+
+    print("Using mass switches:",end='')
+    for a,b in zip(mass_list,tmp_switches): print("({},{}) ".format(a,b),end='')
+    print()
+
     #Get input dimensions
     shape_train=data_set.X_train.shape
     shape_valid=data_set.X_valid.shape
@@ -153,15 +173,13 @@ if __name__ == '__main__':
     prob_predict_valid_NN = model.predict(data_set.X_valid.values, verbose=False)
     #prob_predict_test_NN = model.predict(data_set.X_test, verbose=False)
 
-    #Calculate significance in output range between lower and upper
-    lower=55 # means 36% from the right side
-    upper=75 # means 22% from the right side
-    massindex=0
-    mass=200
-    step = 1
-    
-    highsig,cut_value = calc_sig_new(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], mass, '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold) )
-    #highsig,cut_value = calc_sig(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], lower, upper, step, mass, massindex, '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold) )
+    #Calculate significance in output
+    #highsig,cut_value = calc_sig_new(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], mass=200, '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold) )
+    highsig,cut_value = 0,0
+    if len(args.mass_points)>1: args.mass_points.append(-1)
+    for mass in reversed(args.mass_points):
+        print ("\nEvaluating significance curve at mass: {}".format(mass))
+        highsig,cut_value = calc_sig_new(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold),mass=mass )
     
     # Draw figures
     drawfigure(model,prob_predict_train_NN,data_set,data_set.X_valid.values,nameadd,cut_value,args.Findex,args.nFold)
