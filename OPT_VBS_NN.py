@@ -80,8 +80,18 @@ if __name__ == '__main__':
     #Additional name from model and hyper parameters
     nameadd=args.output+args.model
 
-    tmp_switches=list() #switches for mass points
     mass_list = [200,250,300,350,400,450,500,600,700,800,900]
+    if args.model=="HVT": mass_list = [250,300,350,400,450,500,600,700,800,900,1000]
+
+    if args.model=="HVT" and 200 in args.mass_points:
+        print ("WARNING: you specified 200 GeV mass point for HVT which does not exist, 200 GeV will be removed!!")
+        args.mass_points.remove(200)
+    elif args.model=="GM" and 1000 in args.mass_points:
+        print ("WARNING: you specified 1000 GeV mass point for GM which does not exist, 1000 GeV will be removed!!")
+        args.mass_points.remove(1000)
+        pass
+
+    tmp_switches=list() #switches for mass points
     if len(args.mass_points)>0:
         for mass in mass_list: tmp_switches.append(mass in args.mass_points)
         print("INFO: Overriding the mass switches because the mass_points argument was given!")
@@ -94,10 +104,11 @@ if __name__ == '__main__':
     ar_mass     = np.array(mass_list)
     tmp_array = ar_switches*ar_mass
     args.mass_points = tmp_array.tolist()
-    while args.mass_points[-1]==0: args.mass_points.pop(-1)
-    print(args.mass_points)
+    #Remove extra zeros
+    while 0 in args.mass_points: args.mass_points.remove(0)
+    #print(args.mass_points)
 
-    print("Using mass switches:",end='')
+    print("\nUsing mass switches:",end='')
     for a,b in zip(mass_list,tmp_switches): print("({},{}) ".format(a,b),end='')
     print()
 
