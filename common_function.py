@@ -179,9 +179,9 @@ def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
     print('\nRead Signal Samples')
     for i in range(len(namessig)):
         sample = read_data(input_samples.filedirsig+namessig[i],Findex,nFold)
-        print(namessig[i])
         #sample['Weight']=sample['Weight']*input_samples.lumi*xssig[i]/neventssig[i]  #KM: This is done in WeightNormalized
         sample['LabelMass'] = i
+        print(namessig[i],"\tLabelMass=",i)
         prob[i] = sample.shape[0] 
         if sig is None:
             sig=sample
@@ -281,7 +281,7 @@ def drawfigure(model,prob_predict_train_NN,data,X_test,nameadd,cut_value,Findex,
     plt.clf() 
     return
 
-def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,file_string,mass=200,apply_trva_norm=True,apply_mass_window=False,use_abs_weight=False):
+def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,file_string,masspoints,mass=200,apply_trva_norm=True,apply_mass_window=False,use_abs_weight=False, nbins=1000,debug=False):
     nFold = int(file_string[len(file_string)-1:])
     
     # CONTROL FLAGS             #                                                   #To be consistent with Benjamin
@@ -289,20 +289,10 @@ def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,file_string,mas
     #apply_trva_norm            # training vs validation normalization              #True
     #use_abs_weight             # flip the negative event weights from generator    #True
     do_single_mass   =(mass>0)  # evaluate singificance using one mass point or not #True
-    debug = False
+    #debug,nbins = True,100
 
-    mass_idx=-1 #default for 200GeV
-    if   mass==200: mass_idx=0
-    elif mass==250: mass_idx=1
-    elif mass==300: mass_idx=2
-    elif mass==350: mass_idx=3
-    elif mass==400: mass_idx=4
-    elif mass==450: mass_idx=5
-    elif mass==500: mass_idx=6
-    elif mass==600: mass_idx=7
-    elif mass==700: mass_idx=8
-    elif mass==800: mass_idx=9
-    elif mass==900: mass_idx=10
+    mass_idx=-1 #default for inclusive masses
+    if do_single_mass: mass_idx=masspoints.index(mass)
 
     if not do_single_mass: apply_mass_window=False
 
@@ -366,8 +356,6 @@ def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,file_string,mas
     w_va_s = weight_valid[indices_va_s] #sig validation sample
     w_va_b = weight_valid[indices_va_b] #bkg validation sample
 
-    nbins=1000
-    
     #define nPoints for graphing
     graph_points_tr_x=np.zeros(nbins)
     #graph_points_va_x=np.zeros(nbins) # same as above

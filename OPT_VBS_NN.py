@@ -190,7 +190,7 @@ if __name__ == '__main__':
     if len(args.mass_points)>1: args.mass_points.append(-1)
     for mass in reversed(args.mass_points):
         print ("\nEvaluating significance curve at mass: {}".format(mass))
-        highsig,cut_value = calc_sig_new(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold),mass=mass )
+        highsig,cut_value = calc_sig_new(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold),args.mass_points,mass=mass)
     
     # Draw figures
     drawfigure(model,prob_predict_train_NN,data_set,data_set.X_valid.values,nameadd,cut_value,args.Findex,args.nFold)
