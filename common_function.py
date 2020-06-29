@@ -409,6 +409,7 @@ def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,file_string,mas
         pass
 
     plt.clf()
+
     plt.plot(graph_points_tr_x,graph_points_tr_y, label='train')
     plt.plot(graph_points_tr_x,graph_points_va_y, label='valid')
     plt.legend()
@@ -417,6 +418,7 @@ def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,file_string,mas
     print("Saving sinificance plot: ",output_file)
 
     plt.savefig(output_file)
+    plt.clf()
 
     print("Signal efficiency with cut for best significance: ",sig_eff, ",\t yeilding {} signal events".format(sig_yeild))
 
