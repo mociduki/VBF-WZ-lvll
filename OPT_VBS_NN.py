@@ -19,6 +19,8 @@ from root_numpy import root2array, tree2array, array2root
 from common_function import dataset, AMS, read_data, prepare_data, drawfigure, calc_sig, calc_sig_new, f1, f1_loss
 import config_OPT_NN as conf
 import ROOT 
+from pathlib import Path
+import os
 
 def KerasModel(input_dim,numlayer,numn, bool_drop, dropout):
     model = Sequential()
@@ -70,9 +72,14 @@ if __name__ == '__main__':
     parser.add_argument('--mass_points', help = "mass points to be included in the training", default=list(), type=int,nargs='+')
     parser.add_argument('--nFold', help = "number of folds", default=2, type=int)
     parser.add_argument('--Findex', help = "index in nfolds", default=0, type=int)
+    parser.add_argument('--sdir', help = 'Name of subdirectory within Controlplots/', default='', type=str)
 
     args = parser.parse_args()
     print(args)
+
+    # Checking for or creating subdirectory
+    sub_dir_cp = "ControlPlots/"+args.sdir
+    Path(sub_dir_cp).mkdir(parents=True, exist_ok=True)
 
     #Load input_sample class from config file
     input_sample=conf.input_samples
@@ -159,9 +166,10 @@ if __name__ == '__main__':
         plt.plot(logs.history['val_acc'], label='valid')
         plt.legend()
         plt.title('')
+        if len(args.mass_points)>0: plt.title("mass points : {}".format(args.mass_points))
         plt.xlabel("Epoch")
         plt.ylabel("Accuracy")
-        plt.savefig('./ControlPlots/class_'+nameadd+('_F{0}o{1}'.format(args.Findex,args.nFold))+'.png')
+        plt.savefig(sub_dir_cp + '/class_'+nameadd+('_F{0}o{1}'.format(args.Findex,args.nFold))+'.png')
         plt.clf()
         
         # plot loss vs epochs
@@ -171,8 +179,8 @@ if __name__ == '__main__':
         plt.xlabel("Epoch")
         plt.ylabel("Loss")
         plt.title('')
-        
-        plt.savefig('./ControlPlots/loss_'+nameadd+('_F{0}o{1}'.format(args.Findex,args.nFold))+'.png')
+        if len(args.mass_points)>0: plt.title("mass points : {}".format(args.mass_points))
+        plt.savefig(sub_dir_cp + '/loss_'+nameadd+('_F{0}o{1}'.format(args.Findex,args.nFold))+'.png')
         plt.clf()
         pass
 
@@ -190,10 +198,10 @@ if __name__ == '__main__':
     if len(args.mass_points)>1: args.mass_points.append(-1)
     for mass in reversed(args.mass_points):
         print ("\nEvaluating significance curve at mass: {}".format(mass))
-        highsig,cut_value = calc_sig_new(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold),args.mass_points,mass=mass)
+        highsig,cut_value = calc_sig_new(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold),sub_dir_cp,args.mass_points,mass=mass)
     
     # Draw figures
-    drawfigure(model,prob_predict_train_NN,data_set,data_set.X_valid.values,nameadd,cut_value,args.Findex,args.nFold)
+    drawfigure(model,prob_predict_train_NN,data_set,data_set.X_valid.values,nameadd,cut_value,args.Findex,args.nFold,sub_dir_cp)
 
     cv_str=''
     if   cut_value<0: cv_str="m%f" % cut_value

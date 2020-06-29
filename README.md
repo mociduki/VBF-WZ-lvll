@@ -3,6 +3,21 @@
 
 This training framework is made for A WZ->lvll VBS resonance selection using neural networks/BDT.
 
+## Running the training
+The example below trains a model for a single mass point at 200 GeV and saves the control plots in a subdirectory ControlPlots/m200
+```
+python3 OPT_VBS_NN.py --mass_points 200 --model GM --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex 0 --nFold 4 --sdir m200
+```
+
+This next example trains for mass points 200 and 300 individually, saving each plots and models seperately.
+```
+for mass in 200 300
+do
+    sdir="m"$mass
+    python3 OPT_VBS_NN.py --mass_points $mass --model GM --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex 0 --nFold 4 --sdir 0629/$sdir
+done
+```
+
 ## How to download & initial setup
 ```
 git clone https://github.com/mociduki/VBF-WZ-lvll.git VBF-WZ-lvll_test
