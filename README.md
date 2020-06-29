@@ -1,4 +1,6 @@
 # Introduction
+## This is a fork.
+
 This training framework is made for A WZ->lvll VBS resonance selection using neural networks/BDT.
 
 ## How to download & initial setup
@@ -49,11 +51,10 @@ This should allow an optimal performance for all resonance masses. All Hyperpara
 ## Run NN training
 An example of commandline to run the training looks like below.
 ```
-python3 OPT_VBS_NN.py --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=300 --numlayer=2 --epochs=100 --Findex 0 --nFold 4
+python3 OPT_VBS_NN.py --mass_points 200 --model GM --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex 0 --nFold 4
 ```
 
 where booldropout, dropout, lr, patience, numn, numlayer, and epochs are the hyper-parameters in NN.
-The hyper-parameters in the above example correspond to the result of the preliminary scan done by Benjamin.
 Note that all the relevant parameters other than designated in the commandline are configured via the aforementioned configuration scpript above.
 
 ### nfold cross validation
