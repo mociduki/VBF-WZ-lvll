@@ -9,12 +9,37 @@ The example below trains a model for a single mass point at 200 GeV and saves th
 python3 OPT_VBS_NN.py --mass_points 200 --model GM --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex 0 --nFold 4 --sdir m200
 ```
 
-This next example trains for mass points 200 and 300 individually, saving each plots and models seperately.
+This next example trains 4 folds for mass points 200 and 300 individually, saving each plots and models seperately
 ```
 for mass in 200 300
 do
-    sdir="m"$mass
-    python3 OPT_VBS_NN.py --mass_points $mass --model GM --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex 0 --nFold 4 --sdir 0629/$sdir
+    for n in 0 1 2 3
+    do
+        sdir="m"$mass"-"$n
+        python3 OPT_VBS_NN.py --mass_points $mass --model GM --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex $n --nFold 4 --sdir 0630/$sdir
+    done
+done
+```
+
+## Applying the model
+The example below applies the model and creates new .root ntuples for one fold trained at 200 GeV, saving the results in a subdirectory of OutputRoot 
+```
+python3 Apply_NN.py --input sigvalid_GM_m[200]_S13.738_CVp0.312000_F0o4_NN.h5 --sdir 0630/m200
+```
+
+To apply 4 folds, simply add the file names to the input.
+
+This next example applies each model and folds, and creates new ntuples for masses 200 and 300 individually, assuming 4 folds have been trained already. 
+```
+for mass in 200 300
+do
+    input=""
+    for path in OutputModel/sigvalid_GM_m[$mass*
+    do
+        model=${path##*/}
+        input+=$model","
+    done
+    python3 Apply_NN.py --input ${input%?} --sdir 0630/m$mass
 done
 ```
 

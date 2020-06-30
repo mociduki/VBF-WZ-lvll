@@ -75,7 +75,11 @@ if __name__ == '__main__':
     parser.add_argument('--sdir', help = 'Name of subdirectory within Controlplots/', default='', type=str)
 
     args = parser.parse_args()
-    print(args)
+    print('\n=====================================================================')
+    print('  MODEL       : {}'.format(args.model))
+    print('  MASS POINTS : {}'.format(args.mass_points))
+    print('  FOLD INDEX  : {}'.format(args.Findex))
+    print('=====================================================================\n')
 
     # Checking for or creating subdirectory
     sub_dir_cp = "ControlPlots/"+args.sdir
@@ -209,7 +213,7 @@ if __name__ == '__main__':
 
     print(cv_str)
 
-    outputName='sigvalid_'+args.model+'_S'+str(round(highsig,3))+args.output+"_CV"+cv_str+('_F{0}o{1}'.format(args.Findex,args.nFold))+'_NN'
+    outputName='sigvalid_'+args.model+'_m{}'.format(args.mass_points)+'_S'+str(round(highsig,3))+args.output+"_CV"+cv_str+('_F{0}o{1}'.format(args.Findex,args.nFold))+'_NN'
 
     #Save model in OutputModel with the highest significance obtained on validation set
     model.save('./OutputModel/'+outputName+'.h5')
