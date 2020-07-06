@@ -43,6 +43,12 @@ do
 done
 ```
 
+## Plotting some results
+Using the example below, figures are created showing the result of the training for the signal, and the EW and QCD background, as well as the integrals of these curves depending on the cut value. One must first edit the location of the files within the code itself and check that the main for-loop runs over existing mass files. 
+```
+root -l pSignal_cv_plotting.C
+```
+
 ## How to download & initial setup
 ```
 git clone https://github.com/mociduki/VBF-WZ-lvll.git VBF-WZ-lvll_test

@@ -75,7 +75,7 @@ int main() {
         hist->SetTitle(Form("pSignal - mass %i",mass));
         gPad->SetLogy();
 
-       // Applying condtions
+       // Applying condtions to signal
         c1->cd(3);
         data->SetLineColor(99);
         data->Draw("pSignal >> pSig_f","WeightNormalized*(M_jj>500)*(Deta_jj>3.5)","HIST");
@@ -182,7 +182,7 @@ int main() {
         sig_integral_f->SetName("sig_integral_f");
         sig_integral_f->SetLineWidth(2);
         sig_integral_f->SetLineColor(99);
-        sig_integral_f->SetTitle("");
+        sig_integral_f->SetTitle("Integrals; Cut value");
         sig_integral_f->Draw();
 
         TGraph* b1_integral_f = new TGraph(20, cut_value, bckgd1_integral_f);
