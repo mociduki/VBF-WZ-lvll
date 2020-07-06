@@ -213,7 +213,7 @@ if __name__ == '__main__':
 
     print(cv_str)
 
-    outputName='sigvalid_'+args.model+'_m{}'.format(args.mass_points)+'_S'+str(round(highsig,3))+args.output+"_CV"+cv_str+('_F{0}o{1}'.format(args.Findex,args.nFold))+'_NN'
+    outputName='sigvalid_'+args.model+'_m{}'.format(args.mass_points if len(args.mass_points)==1 else "Multi")+'_S'+str(round(highsig,3))+args.output+"_CV"+cv_str+('_F{0}o{1}'.format(args.Findex,args.nFold))+'_NN'
 
     #Save model in OutputModel with the highest significance obtained on validation set
     model.save('./OutputModel/'+outputName+'.h5')
