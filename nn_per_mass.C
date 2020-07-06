@@ -10,17 +10,22 @@
 #include <TStyle.h>
 #include <iostream>
 
-string get_file_name(int mass) {
+// SUBDIRECTORIES TO EDIT
+string idir  = "0630/";
+string tmass = "m900";
+string sdir  = idir+tmass;
 
+string get_file_name(int mass) {
+  
   string insert_str="main";
-  string              file_path="OutputRoot/new_GM_"+insert_str+"MVA.305028_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_200_qcd0_ntuples.root";
-  if      (mass==300) file_path="OutputRoot/new_GM_"+insert_str+"MVA.305029_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_300_qcd0_ntuples.root";
-  else if (mass==400) file_path="OutputRoot/new_GM_"+insert_str+"MVA.305030_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_400_qcd0_ntuples.root";
-  else if (mass==500) file_path="OutputRoot/new_GM_"+insert_str+"MVA.305031_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_500_qcd0_ntuples.root";
-  else if (mass==600) file_path="OutputRoot/new_GM_"+insert_str+"MVA.305032_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_600_qcd0_ntuples.root";
-  else if (mass==700) file_path="OutputRoot/new_GM_"+insert_str+"MVA.305033_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_700_qcd0_ntuples.root";
-  else if (mass==800) file_path="OutputRoot/new_GM_"+insert_str+"MVA.305034_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_800_qcd0_ntuples.root";
-  else if (mass==900) file_path="OutputRoot/new_GM_"+insert_str+"MVA.305035_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_900_qcd0_ntuples.root";
+  string              file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305028_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_200_qcd0_ntuples.root";
+  if      (mass==300) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305029_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_300_qcd0_ntuples.root";
+  else if (mass==400) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305030_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_400_qcd0_ntuples.root";
+  else if (mass==500) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305031_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_500_qcd0_ntuples.root";
+  else if (mass==600) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305032_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_600_qcd0_ntuples.root";
+  else if (mass==700) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305033_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_700_qcd0_ntuples.root";
+  else if (mass==800) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305034_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_800_qcd0_ntuples.root";
+  else if (mass==900) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305035_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_900_qcd0_ntuples.root";
 
   return file_path;
   
@@ -60,8 +65,8 @@ TH1F* get_bkg_hist() {
   TChain* chain = new TChain("nominal");
   TString ins_str="main";
   //chain->Add("OutputRoot/new_GM_"+ins_str+"MVA.364253_Sherpa_222_NNPDF30NNLO_lllv_ntuples.root");
-  chain->Add("OutputRoot/new_GM_"+ins_str+"MVA.361292_MGaMcAtNloPy8EG_NNPDF30LO_A14NNPDF23LO_WZ_lvll_FxFx_ntuples.root");
-  chain->Add("OutputRoot/new_GM_"+ins_str+"MVA.364284_Sherpa_222_NNPDF30NNLO_lllvjj_EW6_ntuples.root");
+  chain->Add("OutputRoot/"+sdir+"/new_GM_"+ins_str+"MVA.361292_MGaMcAtNloPy8EG_NNPDF30LO_A14NNPDF23LO_WZ_lvll_FxFx_ntuples.root");
+  chain->Add("OutputRoot/"+sdir+"/new_GM_"+ins_str+"MVA.364284_Sherpa_222_NNPDF30NNLO_lllvjj_EW6_ntuples.root");
 
   TH1F* hist = new TH1F("bkg",title,nbins,xmin,xmax);
   chain->Project(hist->GetName(),proj_str,"","norm");
@@ -95,7 +100,7 @@ TH1F* get_hist(int mass) {
 
 void nn_per_mass(TString varname="pSignal") {
 
-  if      (varname == "pSignal"     ) title="NN output", proj_str=varname, nbins = 50, xmin =0, xmax = 1;
+  if      (varname == "pSignal"     ) title="NN output : "+tmass, proj_str=varname, nbins = 50, xmin =0, xmax = 1;
   else if (varname == "M_WZ"        ) title=varname, proj_str=varname, nbins = 50, xmin =0, xmax = 1500;
   else if (varname == "M_jj"        ) title=varname, proj_str=varname, nbins = 50, xmin =0, xmax = 1500;
   else if (varname == "ZetaLep"     ) title=varname, proj_str=varname, nbins = 50, xmin =-3.5, xmax = 3.5;
@@ -138,7 +143,10 @@ void nn_per_mass(TString varname="pSignal") {
 
   vector<int> masses{0,200,300,400,500,600,700,800,900};
 
-  TCanvas* c1 = new TCanvas ("name", "title", 1200, 900);
+  TCanvas* c1 = new TCanvas ("name", "title", 800, 600);
+
+  auto legend = new TLegend(0.12,0.12,0.25,0.4);
+  legend->SetHeader("Mass (GeV)","C"); 
 
   for (auto mass : masses) {
     TH1F* hist = get_hist(mass);
@@ -147,13 +155,18 @@ void nn_per_mass(TString varname="pSignal") {
     if (mass==0) option="hist";
 
     hist->Draw(option);
+    char smass[3];
+    if (mass != 0) { sprintf(smass, "%i", mass); }
+    else { sprintf(smass, "%s", "bck"); }
+    legend->AddEntry(hist,smass,"f");
 
   }
 
   if (varname=="pSignal") gPad->SetLogy();
-
   gStyle->SetOptStat(0);
-  c1->SaveAs("plots/"+varname+".png");
+  legend->Draw();
+  c1->SaveAs("ControlPlots/"+idir+"/NN_output/"+varname+"_"+tmass+".png");
+  c1->SaveAs("ControlPlots/"+idir+"/NN_output/"+varname+"_"+tmass+".root");
 
   return;
  
