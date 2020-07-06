@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from keras.models import model_from_json
 from common_function import read_data_apply, calc_sig, prepare_data, f1, f1_loss
 import config_OPT_NN as conf
+from pathlib import Path
 
 def read_phys_model(file_name):
 
@@ -105,31 +106,35 @@ def calculate_pred_fold(models,data,X,cut_values):
     
     return pred_fold,prob_fold
 
-def save_file(data, pred, proba, filename, phys_model):
+def save_file(data, pred, proba, filename, phys_model, sub_dir):
     #data['isSignal'] = pred
     data['pSignal'] = proba[:]
     print("Input file  =      ",filename)
 
-    outputPath='OutputRoot/new_'+phys_model+'_'+filename     #print(outputPath)
+    # Checking for or creating subdirectory
+    sub_dir_or = "OutputRoot/"+sub_dir
+    Path(sub_dir_or).mkdir(parents=True, exist_ok=True)
+
+    outputPath=sub_dir_or+'/new_'+phys_model+'_'+filename     #print(outputPath)
     array2root(np.array(data.to_records()), outputPath, 'nominal', mode='recreate')
     print('Save file as= {}'.format(outputPath))
     print()
     return
 
-def analyze_data(filedir,filename, model, X_mean, X_dev, label, variables, sigmodel,cut_value):
+def analyze_data(filedir,filename, model, X_mean, X_dev, label, variables, sigmodel,cut_value,sub_dir):
     data, X = read_data_apply(filedir+filename, X_mean, X_dev, label, variables, sigmodel)
     if len(X)==0: return
     pred, proba = calculate_pred(model,X,cut_value)
-    save_file(data, pred, proba, filename, sigmodel)
+    save_file(data, pred, proba, filename, sigmodel, sub_dir)
 
-def analyze_data_folds(filedir,filename, models, X_mean, X_dev, label, variables, sigmodel,cut_values):
+def analyze_data_folds(filedir,filename, models, X_mean, X_dev, label, variables, sigmodel,cut_values,sub_dir):
     data, X = read_data_apply(filedir+filename, X_mean, X_dev, label, variables, sigmodel)
 
     if len(X)==0: return
     #print(len(data),len(X))
     
     pred_fold, proba_fold = calculate_pred_fold(models,data,X,cut_values)
-    save_file(data, pred_fold, proba_fold, filename, sigmodel)
+    save_file(data, pred_fold, proba_fold, filename, sigmodel, sub_dir)
 
 """Run Trained Neural Network on samples
 Usage:
@@ -193,6 +198,7 @@ def read_models(model_files):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Apply NN on ntuples')
     parser.add_argument("--input", help="Name of saved trained NN", default='GM_output_NN.h5', type=str)
+    parser.add_argument("--sdir", help="Subdirectory of saved output", default="", type=str)
     # parser.add_argument("--phys_model", help="Specify Model (HVT or GM)", default='GM', type=str)
 
     args = parser.parse_args()
@@ -235,7 +241,7 @@ if __name__ == '__main__':
 
     print('Applying on all samples')
     for bkg_file in list_bkg:
-        analyze_data_folds(apply_sample.filedirapp,bkg_file,models, X_mean, X_dev,-1,input_sample.variables,phys_model,cut_values)
+        analyze_data_folds(apply_sample.filedirapp,bkg_file,models, X_mean, X_dev,-1,input_sample.variables,phys_model,cut_values,args.sdir)
         pass
 
 #    print('Applying on sig sample')

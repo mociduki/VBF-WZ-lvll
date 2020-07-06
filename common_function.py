@@ -212,7 +212,7 @@ def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
     return data_cont,switches
 
 #Draws Control plot for Neural Network classification
-def drawfigure(model,prob_predict_train_NN,data,X_test,nameadd,cut_value,Findex,nFold):
+def drawfigure(model,prob_predict_train_NN,data,X_test,nameadd,cut_value,Findex,nFold,sub_dir):
     #pcutNN = np.percentile(prob_predict_train_NN,pcut)
 
     Classifier_training_S = model.predict(data.X_train.values[data.y_train.values[:,0]=='1'], verbose=False)
@@ -277,11 +277,11 @@ def drawfigure(model,prob_predict_train_NN,data,X_test,nameadd,cut_value,Findex,
         pass
   
     # Save the result to png
-    plt.savefig("./ControlPlots/NN_clf_"+nameadd+('_F{0}o{1}'.format(Findex,nFold))+".png")
+    plt.savefig(sub_dir + "/NN_clf_"+nameadd+('_F{0}o{1}'.format(Findex,nFold))+".png")
     plt.clf() 
     return
 
-def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,file_string,masspoints,mass=200,apply_trva_norm=True,apply_mass_window=False,use_abs_weight=False, nbins=1000,debug=False):
+def calc_sig_new(data_set, prob_predict_train, prob_predict_valid, file_string, sub_dir, masspoints, mass=200, apply_trva_norm=True, apply_mass_window=False, use_abs_weight=False, nbins=1000, debug=False):
     nFold = int(file_string[len(file_string)-1:])
     
     # CONTROL FLAGS             #                                                   #To be consistent with Benjamin
@@ -409,14 +409,16 @@ def calc_sig_new(data_set,prob_predict_train, prob_predict_valid,file_string,mas
         pass
 
     plt.clf()
+
     plt.plot(graph_points_tr_x,graph_points_tr_y, label='train')
     plt.plot(graph_points_tr_x,graph_points_va_y, label='valid')
     plt.legend()
 
-    output_file='./ControlPlots/significance_m{}_'.format(mass)+file_string+'.png'
+    output_file = sub_dir+'/significance_'+file_string+'.png'
     print("Saving sinificance plot: ",output_file)
 
     plt.savefig(output_file)
+    plt.clf()
 
     print("Signal efficiency with cut for best significance: ",sig_eff, ",\t yeilding {} signal events".format(sig_yeild))
 
