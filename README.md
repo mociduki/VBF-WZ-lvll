@@ -53,8 +53,8 @@ root -l pSignal_cv_plotting.C
 ```
 git clone https://github.com/mociduki/VBF-WZ-lvll.git VBF-WZ-lvll_test
 cd VBF-WZ-lvll_test/Inputs/
-ln -s /lcg/storage19/atlas/mociduki/lvll_samples/restored_20200525
-ln -s hybrid_20200427 MVA
+ln -s /lcg/storage16/atlas/mociduki/lvll_samples/newGMsignal_20200706
+ln -s newGMsignal_20200706 MVA
 cd ..
 . setup.sh
 ```
