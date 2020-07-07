@@ -64,6 +64,7 @@ def read_data(filename,Findex,nFold):
     if nFold>1: cuts+='&&EventNumber%{0}!={1}'.format(nFold,Findex)
     #print('Applying cuts=',cuts)
     array = tree2array(tree, selection=cuts)
+    #print(filename,": nEvents before & after cut=",tree.GetEntries()," ",np.shape(array))
     return pd.DataFrame(array)
 
 class dataset:
@@ -208,7 +209,7 @@ def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
     # Pick a random seed for reproducible results
     # Use 30% of the training sample for validation
 
-    data_cont = dataset(data,1.,input_samples.valfrac,input_samples.variables,model)
+    data_cont = dataset(data,1.,input_samples.trafrac,input_samples.variables,model)
     return data_cont,switches
 
 #Draws Control plot for Neural Network classification
