@@ -6,7 +6,7 @@ class input_samples:
     #Assumed luminosity
     lumi = 140.
     #Fraction used for training 
-    valfrac = 0.1
+    trafrac = 0.9
     #Directory where ntuples are located
     filedir = Filedir+"/"+"main"
     #Bkg Samples
