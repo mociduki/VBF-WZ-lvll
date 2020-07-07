@@ -78,7 +78,7 @@ if __name__ == '__main__':
     print('\n=====================================================================')
     print('  MODEL       : {}'.format(args.model))
     print('  MASS POINTS : {}'.format(args.mass_points))
-    print('  FOLD INDEX  : {}'.format(args.Findex))
+    print('  FOLD INDEX  : {}/{}'.format(args.Findex,args.nFold))
     print('=====================================================================\n')
 
     # Checking for or creating subdirectory
