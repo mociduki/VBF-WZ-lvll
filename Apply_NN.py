@@ -82,17 +82,18 @@ def calculate_pred_fold(models,data,X,cut_values):
         probabilities.append(prob_fold)
         pass
 
-    idx=0
-
     #print('=============================')
     #print(probabilities[0])
     #print('=============================')
     #print(probabilities[1])
-    
+
+    idx=0
     for prob in probabilities[0]:
-        list_idx=idx%len(models)
-        probabilities[0][idx] = probabilities[list_idx][idx]
-        predictions  [0][idx] = predictions  [list_idx][idx]
+        list_idx=data['EventNumber'][idx]%len(models)#idx%len(models)
+        if list_idx!=0:
+            probabilities[0][idx] = probabilities[list_idx][idx]
+            predictions  [0][idx] = predictions  [list_idx][idx]
+            pass
         idx+=1
         pass
 
