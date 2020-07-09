@@ -36,8 +36,8 @@ def AMS(s, b):
     
     return significance
 
-def read_data_apply(filepath, X_mean, X_dev, Label, variables,model,Findex=0,nFold=1):
-    data = read_data(filepath,Findex,nFold)
+def read_data_apply(filepath, X_mean, X_dev, Label, variables,model):
+    data = read_data(filepath)
     data = data.reset_index(drop=True)
 
     X = data[variables]
@@ -57,22 +57,25 @@ def read_data_apply(filepath, X_mean, X_dev, Label, variables,model,Findex=0,nFo
     return data, X
 
 
-def read_data(filename,Findex,nFold):
+def read_data(filename):
     root = ROOT.TFile(filename)
     tree = root.Get('nominal')
     cuts='Jet1Pt>0&&Jet2Pt>0&&M_jj>100.'
-    if nFold>1: cuts+='&&EventNumber%{0}!={1}'.format(nFold,Findex)
+    #KM: now the folding division is applied in the dataset class below
+    #if nFold>1: cuts+='&&EventNumber%{0}!={1}'.format(nFold,Findex)
     #print('Applying cuts=',cuts)
     array = tree2array(tree, selection=cuts)
-    #print(filename,": nEvents before & after cut=",tree.GetEntries()," ",np.shape(array))
+    #print(filename,": nEvents bfr & aft cut=",tree.GetEntries()," ",np.shape(array))
     return pd.DataFrame(array)
 
 class dataset:
-    def __init__(self,data,frac_train,frac_valid,variables,model):
-        train_full=data.sample(frac=frac_train,random_state=42)
-        #test=data.drop(train_full.index)
-        train=train_full.sample(frac=frac_valid,random_state=42)
-        validation=train_full.drop(train.index)
+    def __init__(self,data,frac_train,variables,model,nFold,Findex):
+        full=data.sample(frac=1)#,random_state=42)
+        #test=data.drop(full.index)
+
+        train = full[(full['EventNumber'])%nFold!=Findex] #x-valid here
+        #train=full.sample(frac=frac_train,random_state=42)
+        validation=full.drop(train.index)
 
         #Separate variables from labels
         self.y_train=train[['Label']]#to_categorical(train[['Label']])
@@ -131,7 +134,7 @@ def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
     bg = None
     print('\nRead Background Samples')
     for i in range(len(namesbkg)):
-        sample = read_data(input_samples.filedir+namesbkg[i],Findex,nFold)
+        sample = read_data(input_samples.filedir+namesbkg[i])
         print(namesbkg[i])
         #sample['Weight']=sample['Weight']*input_samples.lumi*xsbkg[i]/neventsbkg[i] #KM: This is done in WeightNormalized
         if bg is None:
@@ -179,7 +182,7 @@ def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
     prob = np.empty(len(namessig))
     print('\nRead Signal Samples')
     for i in range(len(namessig)):
-        sample = read_data(input_samples.filedirsig+namessig[i],Findex,nFold)
+        sample = read_data(input_samples.filedirsig+namessig[i])
         #sample['Weight']=sample['Weight']*input_samples.lumi*xssig[i]/neventssig[i]  #KM: This is done in WeightNormalized
         sample['LabelMass'] = i
         print(namessig[i],"\tLabelMass=",i)
@@ -203,13 +206,14 @@ def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
     elif model=='HVT':
         np.save('./probHVT', prob)
 
+    #KM: now add sig+bkg to get entire 'data' sample
     data=bg.append(sig)#, sort=True)
     #data.loc[data.m_Valid_jet3 == 0, ['m_Eta_jet3','m_Y_jet3','m_Phi_jet3']] = -10., -10., -5.
     data = data.sample(frac=1,random_state=42).reset_index(drop=True)
     # Pick a random seed for reproducible results
     # Use 30% of the training sample for validation
 
-    data_cont = dataset(data,1.,input_samples.trafrac,input_samples.variables,model)
+    data_cont = dataset(data,input_samples.trafrac,input_samples.variables,model,nFold,Findex)
     return data_cont,switches
 
 #Draws Control plot for Neural Network classification
@@ -327,7 +331,7 @@ def calc_sig_new(data_set, prob_predict_train, prob_predict_valid, file_string, 
         weight_valid = abs(weight_valid)
         pass
 
-    print( "Nevents(train), Nevents(valid)= ",len(label_train), len(label_valid))
+    if mass_idx<0: print( "Nevents(train), Nevents(valid)= ",len(label_train), len(label_valid))
 
     indices_tr_s = np.where( label_train=='1' )[0]
     indices_tr_b = np.where( label_train=='0' )[0]
@@ -415,7 +419,7 @@ def calc_sig_new(data_set, prob_predict_train, prob_predict_valid, file_string, 
     plt.plot(graph_points_tr_x,graph_points_va_y, label='valid')
     plt.legend()
 
-    output_file = sub_dir+'/significance_'+file_string+'.png'
+    output_file = sub_dir+'/significance_'+file_string+"_m{}".format(mass)+'.png'
     print("Saving sinificance plot: ",output_file)
 
     plt.savefig(output_file)
