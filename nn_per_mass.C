@@ -98,7 +98,10 @@ TH1F* get_hist(int mass) {
   return hist;
 }
 
-void nn_per_mass(TString varname="pSignal") {
+void nn_per_mass(string dir="", string name="",TString varname="pSignal") {
+  idir = dir;
+  tmass = name;
+  sdir  = idir+tmass;
 
   if      (varname == "pSignal"     ) title="NN output : "+tmass, proj_str=varname, nbins = 50, xmin =0, xmax = 1;
   else if (varname == "M_WZ"        ) title=varname, proj_str=varname, nbins = 50, xmin =0, xmax = 1500;
