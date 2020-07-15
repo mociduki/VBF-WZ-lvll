@@ -98,11 +98,25 @@ class apply_samples:
     
     # parse all files in the directory, except signals
     list_apply_bkg = []
+
+    shortList= [450765,450766,450767,450768,450769,450770,450771,450772,450773,450774,305035, #GM  sig
+                307730,307731,307732,307733,307734,307735,307736,307737,307738,               #HVT sig
+                361292,364284]                                                                #WZ bkg
+    #shortList=list() #uncomment when applying to all samples
     
     for r,d,f in os.walk(filedirapp):
         #print(f)
         for file in f:
             if 'history' in file: continue
+
+            skipFlag=True
+            for ch in shortList:
+                if "{}".format(ch) in file: 
+                    skipFlag=False
+                    break
+                pass
+            if skipFlag: continue
+
             if '.root' in file:
                 #print(file)
                 #if file in list_apply_sigGM: continue

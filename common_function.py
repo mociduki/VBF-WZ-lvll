@@ -1,6 +1,6 @@
 import keras
 from keras.utils.np_utils import to_categorical
-import ROOT
+import ROOT, pickle
 from root_numpy import root2array, tree2array, array2root
 import pandas as pd
 import numpy as np
@@ -36,24 +36,51 @@ def AMS(s, b):
     
     return significance
 
-def read_data_apply(filepath, X_mean, X_dev, Label, variables,model):
+def read_data_apply(filepath, tr_files, Label, variables,model,apply_transform=True,debug=False):
     data = read_data(filepath)
-    data = data.reset_index(drop=True)
+
+    nFold=len(tr_files)
 
     X = data[variables]
 
-    X= X-X_mean
-    X= X/X_dev
-    if (Label>-1):
-        X['LabelMass']=Label
-    else:
-        if model=='GM':
-            prob=np.load('probGM.npy')
-        elif model=='HVT':
-            prob=np.load('probHVT.npy')
-        label=np.random.choice(prob.shape[0],X.shape[0], p=prob)
-        X['LabelMass'] = label
+    if debug: print("before\n",X)
+    if apply_transform:
+        #X= (X-X_mean)/X_dev
+        tr_lists = list()
+        for trFile in tr_files: 
+            path2read = "OutputModel/"+trFile
+            if debug:print ("reading transformation info from: ",path2read)
+            tr_lists .append(pickle.load(open( path2read, 'rb' )))
 
+        X_folds = list()
+        for findex in range(nFold):
+            X_folds.append(X[data['EventNumber']%nFold==findex])
+            x_mean,x_dev = tr_lists[findex][0], tr_lists[findex][1]
+            X_folds[-1] = (X_folds[-1] - x_mean)/x_dev # transform
+            pass
+
+        if debug: 
+            for x_f in X_folds: print(np.shape(x_f))            #print(x_f)
+
+        X = pd.concat(X_folds) # unsorted
+        X = X.sort_index()     # sort it again ac 2 the original order, to assign masslabel below
+
+        if debug: print(type(X),np.shape(X))
+
+        pass
+    if debug: print("after\n",X)
+
+    if (Label>-1): X['LabelMass']=Label
+    else:
+        if model=='GM':            prob=np.load('probGM.npy')
+        elif model=='HVT':         prob=np.load('probHVT.npy')
+
+        label=np.random.choice(prob.shape[0],X.shape[0], p=prob)
+        #X['LabelMass'] = label
+        X['LabelMass'] = get_mass_label(data["M_WZ"])
+        pass
+
+    data = data.reset_index(drop=True) # now remove index again
     return data, X
 
 
@@ -69,7 +96,7 @@ def read_data(filename):
     return pd.DataFrame(array)
 
 class dataset:
-    def __init__(self,data,frac_train,variables,model,nFold,Findex):
+    def __init__(self,data,frac_train,variables,model,nFold,Findex,transform,apply_transform=True):
         full=data.sample(frac=1)#,random_state=42)
         #test=data.drop(full.index)
 
@@ -94,24 +121,28 @@ class dataset:
         self.W_valid=validation[['WeightNormalized']]
         #self.W_test=test[['Weight']]
 
+        #self.evtNum_train=train[['EventNumber']]
+        self.evtNum_valid=validation[['EventNumber']]
+        #self.ch_train=train[['isMC']]
+        self.ch_valid=validation[['isMC']]
+
         X_train = train[variables]
         X_valid = validation[variables]
 
         #Save mean and std dev separately for both models
-        if model=='GM':
-            np.save('./meanGM', np.mean(X_train))
-            np.save('./std_devGM', np.std(X_train))
-        elif model=='HVT':
-            np.save('./meanHVT', np.mean(X_train))      
-            np.save('./std_devHVT', np.std(X_train))
-        else :
-            raise NameError('Model needs to be either GM or HVT')
+        if not(model=='GM' or model=='HVT'): raise NameError('Model needs to be either GM or HVT')
+        #np.save('./mean'+model, np.mean(X_train))
+        #np.save('./std_dev'+model, np.std(X_train))
+        transform.append(np.mean(X_train))
+        transform.append(np.std(X_train))
 
-        self.X_train= X_train-np.mean(X_train)
-        self.X_train= X_train/np.std(X_train)
-
-        self.X_valid= X_valid-np.mean(X_valid)
-        self.X_valid= X_valid/np.std(X_valid)
+        if apply_transform:
+            self.X_train= (X_train-np.mean(X_train))/np.std(X_train)
+            self.X_valid= (X_valid-np.mean(X_train))/np.std(X_train)
+        else:
+            self.X_train= X_train
+            self.X_valid= X_valid
+            pass
         
         #self.X_test= self.X_test-np.mean(self.X_test)
         #self.X_test= self.X_test/np.std(self.X_test)
@@ -122,6 +153,20 @@ class dataset:
         self.mass_train_label=train[['LabelMass']]
         self.mass_valid_label=validation[['LabelMass']]
         #self.X_test['LabelMass']=test[['LabelMass']]
+
+def get_mass_label(mWZ):
+
+    bars = [225,275,325,375,425,475,550,650,750,850,950]
+
+    #mass_labels = np.invert(mWZ<=bars[0]) # smallest range, index=0
+    mass_labels = np.zeros(len(mWZ)) # smallest range, index=0
+
+    for i in range(1,len(bars)-1):
+        mass_labels += ( ((bars[i] < mWZ) & (mWZ < bars[i+1])) * i )
+
+    mass_labels += (mWZ > bars[-1]) * len(bars)
+
+    return mass_labels
         
 def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
     #Read background and signal files and save them as panda data frames
@@ -161,7 +206,6 @@ def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
             neventssig .append( input_samples.sigGM["nevents"][i] )
             pass
         #print(namessig,len(namessig))
-
     elif model=='HVT':
         switches   = input_samples.sigHVT["switch" ]
         if len(arg_switches)==len(switches): switches = arg_switches
@@ -175,16 +219,16 @@ def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
             neventssig .append( input_samples.sigHVT["nevents"][i] )
             pass
         #print(namessig,len(namessig))
-
     else :
         raise NameError('Model needs to be either GM or HVT')
+
     sig = None
     prob = np.empty(len(namessig))
     print('\nRead Signal Samples')
     for i in range(len(namessig)):
         sample = read_data(input_samples.filedirsig+namessig[i])
         #sample['Weight']=sample['Weight']*input_samples.lumi*xssig[i]/neventssig[i]  #KM: This is done in WeightNormalized
-        sample['LabelMass'] = i
+        sample['LabelMass'] = get_mass_label(sample['M_WZ']) #sample['LabelMass'] = i
         print(namessig[i],"\tLabelMass=",i)
         prob[i] = sample.shape[0] 
         if sig is None:
@@ -196,25 +240,22 @@ def prepare_data(input_samples,model,Findex,nFold,arg_switches=list()):
     sig['Label'] = '1'
 
     #Apply random mass label to bkg
-    label=np.random.choice(len(namessig),bg.shape[0], p=prob)
+    label= get_mass_label(bg['M_WZ']) #np.random.choice(len(namessig),bg.shape[0], p=prob)
 
     bg['LabelMass'] = label
 
     #Save prob distribution
-    if model=='GM':
-        np.save('./probGM', prob)
-    elif model=='HVT':
-        np.save('./probHVT', prob)
+    if model=='GM':        np.save('./probGM', prob)
+    elif model=='HVT':     np.save('./probHVT', prob)
 
     #KM: now add sig+bkg to get entire 'data' sample
     data=bg.append(sig)#, sort=True)
     #data.loc[data.m_Valid_jet3 == 0, ['m_Eta_jet3','m_Y_jet3','m_Phi_jet3']] = -10., -10., -5.
     data = data.sample(frac=1,random_state=42).reset_index(drop=True)
     # Pick a random seed for reproducible results
-    # Use 30% of the training sample for validation
-
-    data_cont = dataset(data,input_samples.trafrac,input_samples.variables,model,nFold,Findex)
-    return data_cont,switches
+    transform=list()
+    data_cont = dataset(data,input_samples.trafrac,input_samples.variables,model,nFold,Findex,transform)
+    return data_cont,switches,transform
 
 #Draws Control plot for Neural Network classification
 def drawfigure(model,prob_predict_train_NN,data,X_test,nameadd,cut_value,Findex,nFold,sub_dir):

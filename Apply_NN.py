@@ -66,7 +66,6 @@ def read_cut(file_name):
 def calculate_pred(model,X,cut_value):
     print('nEvents / file=\t',len(X))
     prob_predict=model.predict(X.values, verbose=False)
-    #print(prob_predict)
     #pcutNN = np.percentile(prob_predict,40.)
     Yhat=prob_predict[:] > cut_value
     return Yhat, prob_predict
@@ -87,14 +86,16 @@ def calculate_pred_fold(models,data,X,cut_values):
     #print('=============================')
     #print(probabilities[1])
 
-    idx=0
-    for prob in probabilities[0]:
+    #for i in range(len(probabilities[0])):
+    #    x_str = np.array_repr(X.values[i]).replace('\n', '')
+    #    print(data["EventNumber"][i],x_str,probabilities[0][i][0])
+            
+    for idx in range(len(probabilities[0])):
         list_idx=data['EventNumber'][idx]%len(models)#idx%len(models)
         if list_idx!=0:
             probabilities[0][idx] = probabilities[list_idx][idx]
             predictions  [0][idx] = predictions  [list_idx][idx]
             pass
-        idx+=1
         pass
 
     #print('=============================')
@@ -110,7 +111,7 @@ def calculate_pred_fold(models,data,X,cut_values):
 def save_file(data, pred, proba, filename, phys_model, sub_dir):
     #data['isSignal'] = pred
     data['pSignal'] = proba[:]
-    print("Input file  =      ",filename)
+    print("Input file  =\t\t\t",filename)
 
     # Checking for or creating subdirectory
     sub_dir_or = "OutputRoot/"+sub_dir
@@ -128,14 +129,19 @@ def analyze_data(filedir,filename, model, X_mean, X_dev, label, variables, sigmo
     pred, proba = calculate_pred(model,X,cut_value)
     save_file(data, pred, proba, filename, sigmodel, sub_dir)
 
-def analyze_data_folds(filedir,filename, models, X_mean, X_dev, label, variables, sigmodel,cut_values,sub_dir):
-    data, X = read_data_apply(filedir+filename, X_mean, X_dev, label, variables, sigmodel)
+def analyze_data_folds(filedir,filename, models, tr_files, label, variables, sigmodel,cut_values,sub_dir,debug=False):
+    data, X = read_data_apply(filedir+filename, tr_files, label, variables, sigmodel)
 
     if len(X)==0: return
     #print(len(data),len(X))
     
     pred_fold, proba_fold = calculate_pred_fold(models,data,X,cut_values)
     save_file(data, pred_fold, proba_fold, filename, sigmodel, sub_dir)
+    if debug:
+        for i in range(len(data['EventNumber'])):
+            print (data['EventNumber'][i], proba_fold[i][0])
+            #x_str = np.array_repr(X.values[i]).replace('\n', '')
+            #print (data['EventNumber'][i], x_str, proba_fold[i][0])
 
 """Run Trained Neural Network on samples
 Usage:
@@ -182,7 +188,14 @@ def parse_model_files(input):
             pass
         pass
 
-    return files
+    tr_files=list()
+    for filename in files:
+        tr_file=filename
+        tr_file=tr_file.replace(".h5",".pkl")
+        tr_files.append(tr_file)
+        pass
+
+    return files,tr_files
 
 def read_models(model_files):
 
@@ -205,7 +218,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print(args)
 
-    model_files=parse_model_files(args.input)
+    model_files,tr_files=parse_model_files(args.input)
 
     #Load input_sample class from config file
     input_sample=conf.input_samples
@@ -219,14 +232,10 @@ if __name__ == '__main__':
     phys_model=read_phys_models(model_files)
 
     #Load Mean and std dev
-    if phys_model=='GM':
-        X_mean = np.load('meanGM.npy')
-        X_dev = np.load('std_devGM.npy')
-    elif phys_model=='HVT':
-        X_mean = np.load('meanHVT.npy')
-        X_dev = np.load('std_devHVT.npy')
-    else :
+    if not(phys_model=='GM' or phys_model=='HVT'):
         raise NameError('Model needs to be either GM or HVT')
+#    X_mean = np.load('mean'+phys_model+'.npy')
+#    X_dev = np.load('std_dev'+phys_model+'.npy')
     #Mean and std dev from training
     #print(X_mean)
     #print(X_dev)
@@ -234,7 +243,7 @@ if __name__ == '__main__':
     #list_data = apply_sample.list_apply_data
 
     #Apply NN on all samples in config file
-    list_bkg = apply_sample.list_apply_bkg
+    list_bkg = apply_sample.list_apply_bkg # not only background but all sample is listed in this
 #    if phys_model=='GM': 
 #        list_sig = apply_sample.list_apply_sigGM
 #    elif phys_model=='HVT':
@@ -242,7 +251,8 @@ if __name__ == '__main__':
 
     print('Applying on all samples')
     for bkg_file in list_bkg:
-        analyze_data_folds(apply_sample.filedirapp,bkg_file,models, X_mean, X_dev,-1,input_sample.variables,phys_model,cut_values,args.sdir)
+        #if "450765" in bkg_file:
+        analyze_data_folds(apply_sample.filedirapp,bkg_file,models, tr_files,-1,input_sample.variables,phys_model,cut_values,args.sdir)
         pass
 
 #    print('Applying on sig sample')

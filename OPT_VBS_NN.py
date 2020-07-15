@@ -18,19 +18,19 @@ import math
 from root_numpy import root2array, tree2array, array2root
 from common_function import dataset, AMS, read_data, prepare_data, drawfigure, calc_sig, calc_sig_new, f1, f1_loss
 import config_OPT_NN as conf
-import ROOT 
+import ROOT, pickle
 from pathlib import Path
 import os
 
-def KerasModel(input_dim,numlayer,numn, bool_drop, dropout):
+def KerasModel(input_dim,numlayer,numn, dropout):
     model = Sequential()
     model.add(Dense(numn, input_dim=int(input_dim)))
     model.add(Activation('relu'))
-    if bool_drop: model.add(Dropout(dropout))
+    if dropout>0: model.add(Dropout(dropout))
     for i in range(numlayer-1):
         model.add(Dense(numn))
         model.add(Activation('relu'))
-        if bool_drop: model.add(Dropout(dropout))
+        if dropout>0: model.add(Dropout(dropout))
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
 
@@ -71,6 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--nFold', help = "number of folds", default=2, type=int)
     parser.add_argument('--Findex', help = "index in nfolds", default=0, type=int)
     parser.add_argument('--sdir', help = 'Name of subdirectory within Controlplots/', default='', type=str)
+    parser.add_argument('--debug', help = 'Debug flag to dump output info', default=False, type=bool)
 
     args = parser.parse_args()
     print('\n=====================================================================')
@@ -107,7 +108,7 @@ if __name__ == '__main__':
     else: print("INFO: No mass_points argument was given. Using default mass switches in the config_OP_NN.py!")
 
     #Read data files
-    data_set,tmp_switches=prepare_data(input_sample,args.model,args.Findex,args.nFold,arg_switches=tmp_switches)
+    data_set,tmp_switches,transform=prepare_data(input_sample,args.model,args.Findex,args.nFold,arg_switches=tmp_switches)
 
     ar_switches = np.array(tmp_switches)
     ar_mass     = np.array(mass_list)
@@ -137,7 +138,7 @@ if __name__ == '__main__':
     print('Number of training: {}, validation: {} and total events: {}.'.format(num_train,num_valid,num_tot))
 
     #Define model with given parameters
-    model=KerasModel(shape_train[1],args.numlayer,args.numn,(args.dropout>0),args.dropout)
+    model=KerasModel(shape_train[1],args.numlayer,args.numn,args.dropout)
     
     #Possible optimizers
     sgd = optimizers.SGD(lr=args.lr, decay=1e-6, momentum=0.6, nesterov=True)
@@ -154,7 +155,7 @@ if __name__ == '__main__':
     #    f.write(model.to_json())
 
     #Define checkpoint to save best performing NN and early stopping
-    path='./OutputModel/'+nameadd+'output_NN.h5'
+    path='./OutputModel/'+nameadd+'checkpoint_NN.h5'
     #checkpoint=keras.callbacks.ModelCheckpoint(filepath='output_NN.h5', monitor='val_acc', verbose=args.v, save_best_only=True)
     callbacks=[EarlyStopping(monitor='val_loss', patience=args.patience),ModelCheckpoint(filepath=path, monitor='val_loss', verbose=args.v, save_best_only=True)]
 
@@ -194,6 +195,14 @@ if __name__ == '__main__':
     prob_predict_valid_NN = model.predict(data_set.X_valid.values, verbose=False)
     #prob_predict_test_NN = model.predict(data_set.X_test, verbose=False)
 
+    if args.debug:
+        for i in range(len(prob_predict_valid_NN)):
+            if data_set.ch_valid.values[i][0]!=450765: continue
+            print (data_set.evtNum_valid.values[i][0], prob_predict_valid_NN[i][0])
+            #x_str = np.array_repr(data_set.X_valid.values[i]).replace('\n', '')
+            #print (data_set.evtNum_valid.values[i][0], x_str, prob_predict_valid_NN[i][0])
+            pass
+        
     #Calculate significance in output
     #highsig,cut_value = calc_sig_new(data_set, prob_predict_train_NN[:,0], prob_predict_valid_NN[:,0], mass=200, '{0}_NN{1}_F{2}o{3}'.format(args.model,args.output,args.Findex,args.nFold) )
     highsig,cut_value = 0,0
@@ -215,3 +224,4 @@ if __name__ == '__main__':
 
     #Save model in OutputModel with the highest significance obtained on validation set
     model.save('./OutputModel/'+outputName+'.h5')
+    pickle.dump(transform,open("OutputModel/"+outputName+".pkl", 'wb'))
