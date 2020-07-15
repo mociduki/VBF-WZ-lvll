@@ -8,7 +8,9 @@
 #include <TChain.h>
 #include <TCanvas.h>
 #include <TStyle.h>
+#include <TLegend.h>
 #include <iostream>
+#include <unordered_map>
 
 // SUBDIRECTORIES TO EDIT
 string idir  = "0630/";
@@ -18,13 +20,16 @@ string sdir  = idir+tmass;
 string get_file_name(int mass) {
   
   string insert_str="main";
-  string              file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305028_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_200_qcd0_ntuples.root";
-  if      (mass==300) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305029_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_300_qcd0_ntuples.root";
-  else if (mass==400) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305030_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_400_qcd0_ntuples.root";
-  else if (mass==500) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305031_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_500_qcd0_ntuples.root";
-  else if (mass==600) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305032_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_600_qcd0_ntuples.root";
-  else if (mass==700) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305033_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_700_qcd0_ntuples.root";
-  else if (mass==800) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305034_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_800_qcd0_ntuples.root";
+  string              file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450765_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m200_ntuples.root";
+  if      (mass==250) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450766_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m250_ntuples.root";
+  else if (mass==300) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450767_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m300_ntuples.root";
+  else if (mass==350) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450768_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m350_ntuples.root";
+  else if (mass==400) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450769_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m400_ntuples.root";
+  else if (mass==450) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450770_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m450_ntuples.root";
+  else if (mass==500) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450771_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m500_ntuples.root";
+  else if (mass==600) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450772_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m600_ntuples.root";
+  else if (mass==700) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450773_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m700_ntuples.root";
+  else if (mass==800) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450774_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m800_ntuples.root";
   else if (mass==900) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305035_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_900_qcd0_ntuples.root";
 
   return file_path;
@@ -57,7 +62,8 @@ int get_color(int mass) {
 // Weight          = 0
 // PtReweight      = 0
 
-TString title, proj_str;
+TString title, proj_str,select_weight;
+TString proj_option="";
 int nbins = 50; float xmin =0, xmax = 1;
 
 TH1F* get_bkg_hist() {
@@ -69,7 +75,7 @@ TH1F* get_bkg_hist() {
   chain->Add("OutputRoot/"+sdir+"/new_GM_"+ins_str+"MVA.364284_Sherpa_222_NNPDF30NNLO_lllvjj_EW6_ntuples.root");
 
   TH1F* hist = new TH1F("bkg",title,nbins,xmin,xmax);
-  chain->Project(hist->GetName(),proj_str,"","norm");
+  chain->Project(hist->GetName(),proj_str,select_weight,proj_option);
 
   return hist;
 }
@@ -87,18 +93,58 @@ TH1F* get_hist(int mass) {
     //std::cout<<histName<<std::endl;
 
     hist = new TH1F(histName ,title,nbins,xmin,xmax);
-    t->Project(hist->GetName(),proj_str,"","norm");
+    t->Project(hist->GetName(),proj_str,select_weight,proj_option);
   }
   else hist = get_bkg_hist();
 
-  hist->SetMaximum(hist->GetBinContent( hist->GetMaximumBin() )*1.8);
+  hist->SetMaximum(hist->GetBinContent( hist->GetMaximumBin() )*7);
   hist->SetLineWidth(2);
   hist->SetLineColor(get_color(mass));
   
   return hist;
 }
 
-void nn_per_mass(string dir="", string name="",TString varname="pSignal") {
+float AMS(float s, float b, bool debug=false) {
+
+  if (s<0 or b<0) return 0;
+
+  float br = 0.00001;// #KM: systematic unc?
+  float sigma=sqrt(b+br);
+  float n=s+b+br;
+  float radicand = 2 *( n * log (n*(b+br+sigma)/(b*b+n*sigma+br))-b*b/sigma*log(1+sigma*(n-b)/(b*(b+br+sigma))));
+
+  float ams= 0;
+  if (radicand < 0) std::cout<<"AMS: radicand is negative. Returning 0."<<std::endl;
+  else       ams= sqrt(radicand);
+
+  if (debug) std::cout<<"s, b="<<s<<"\t"<<b<<", ams="<<ams<<std::endl;
+
+  return ams;
+
+}
+
+TH1F* get_significance_hist(TH1F* h_sig, TH1F* h_bkg, float sf) {
+  
+  TString hname="significance_";
+  TH1F* significance = (TH1F*) h_sig->Clone(hname+h_sig->GetName());
+  significance->Reset();
+  significance->SetTitle("Significance for yield / 140fb-1");
+
+  h_sig->Scale(sf);
+  h_bkg->Scale(sf);
+
+  float Nsig=0,Nbkg=0;
+  for( int i=0; i< significance->GetNbinsX(); i++) {
+    Nsig=h_sig->Integral(i,h_sig->GetNbinsX());
+    Nbkg=h_bkg->Integral(i,h_bkg->GetNbinsX());
+    significance->SetBinContent(i,AMS(Nsig,Nbkg));
+  }
+
+  return significance;
+
+}
+
+void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool norm2yield=true) {
   idir = dir;
   tmass = name;
   sdir  = idir+tmass;
@@ -144,15 +190,26 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal") {
   // Jet2Phi // Jet2Y           // M_Z
   // Jet3Phi // Jet3Y           
 
+  select_weight = "(M_jj>100)";
+  if (norm2yield) select_weight += "*WeightNormalized";
+  else proj_option="norm"; //normalize to 1
+
   vector<int> masses{0,200,300,400,500,600,700,800,900};
 
   TCanvas* c1 = new TCanvas ("name", "title", 800, 600);
 
-  auto legend = new TLegend(0.12,0.12,0.25,0.4);
+  auto legend = new TLegend(0.7,0.65,0.9,0.9);
   legend->SetHeader("Mass (GeV)","C"); 
+  legend->SetFillStyle(0); 
+  legend->SetLineWidth(0); 
+  legend->SetNColumns(2); 
+
+  std::unordered_map<int,TH1F*> hists;
 
   for (auto mass : masses) {
+    if (mass>500) continue;
     TH1F* hist = get_hist(mass);
+    hists[mass]=hist;
 
     TString option="same hist";
     if (mass==0) option="hist";
@@ -160,16 +217,38 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal") {
     hist->Draw(option);
     char smass[3];
     if (mass != 0) { sprintf(smass, "%i", mass); }
-    else { sprintf(smass, "%s", "bck"); }
+    else { sprintf(smass, "%s", "bkg"); }
     legend->AddEntry(hist,smass,"f");
 
   }
 
-  if (varname=="pSignal") gPad->SetLogy();
+  if (varname=="pSignal" and norm2yield) gPad->SetLogy();
+
   gStyle->SetOptStat(0);
   legend->Draw();
   c1->SaveAs("ControlPlots/"+idir+"/NN_output/"+varname+"_"+tmass+".png");
   c1->SaveAs("ControlPlots/"+idir+"/NN_output/"+varname+"_"+tmass+".root");
+
+  if (not (norm2yield and varname=="pSignal")) return;
+
+  auto c2 = new TCanvas("c2","title",800,600);
+
+  float sf= 1;
+
+  for (auto mass : masses) {
+    if      (mass==0 ) continue;
+    else if (mass>500) continue;
+
+    auto significance = get_significance_hist(hists[mass],hists[0],sf);
+    if (mass==200) significance->SetMaximum(significance->GetBinContent( significance->GetMaximumBin() )*2);//significance->SetMaximum(10);
+
+    TString option="same hist";
+    if (mass==1) option="hist";
+
+    significance->Draw(option);
+    
+  }
+  legend->Draw();
 
   return;
  
