@@ -190,7 +190,7 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
   // Jet2Phi // Jet2Y           // M_Z
   // Jet3Phi // Jet3Y           
 
-  select_weight = "(M_jj>100)";
+  select_weight = "(M_jj>100)&&abs(Weight)<10";
   if (norm2yield) select_weight += "*WeightNormalized";
   else proj_option="norm"; //normalize to 1
 

@@ -87,7 +87,7 @@ def read_data_apply(filepath, tr_files, Label, variables,model,apply_transform=T
 def read_data(filename):
     root = ROOT.TFile(filename)
     tree = root.Get('nominal')
-    cuts='Jet1Pt>0&&Jet2Pt>0&&M_jj>100.'
+    cuts='Jet1Pt>0&&Jet2Pt>0&&M_jj>100.&&abs(Weight)<10'
     #KM: now the folding division is applied in the dataset class below
     #if nFold>1: cuts+='&&EventNumber%{0}!={1}'.format(nFold,Findex)
     #print('Applying cuts=',cuts)
