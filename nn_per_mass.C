@@ -103,7 +103,7 @@ TH1F* get_hist(int mass,TString phys_model="GM") {
 
   TH1F* hist;
   if (mass>0) {
-    string fname=get_file_name(mass,phys_model);
+    string fname=get_file_name(mass,phys_model.Data());
     
     TFile* f = TFile::Open(fname.data(),"read");
     TTree* t = (TTree*)f->Get("nominal");
@@ -114,7 +114,7 @@ TH1F* get_hist(int mass,TString phys_model="GM") {
     hist = new TH1F(histName ,title,nbins,xmin,xmax);
     t->Project(hist->GetName(),proj_str,select_weight,proj_option);
   }
-  else hist = get_bkg_hist(phys_model);
+  else hist = get_bkg_hist(phys_model.Data());
 
   hist->SetMaximum(hist->GetBinContent( hist->GetMaximumBin() )*7);
   hist->SetLineWidth(2);
@@ -226,7 +226,7 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
   std::unordered_map<int,TH1F*> hists;
 
   for (auto mass : masses) {
-    TH1F* hist = get_hist(mass,phys_model);
+    TH1F* hist = get_hist(mass,phys_model.Data());
     hists[mass]=hist;
 
     TString option="same hist";
