@@ -144,7 +144,7 @@ TH1F* get_significance_hist(TH1F* h_sig, TH1F* h_bkg, float sf) {
 
 }
 
-void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool norm2yield=true) {
+void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool norm2yield=false) {
   idir = dir;
   tmass = name;
   sdir  = idir+tmass;
@@ -207,7 +207,6 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
   std::unordered_map<int,TH1F*> hists;
 
   for (auto mass : masses) {
-    if (mass>500) continue;
     TH1F* hist = get_hist(mass);
     hists[mass]=hist;
 
@@ -226,8 +225,11 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
 
   gStyle->SetOptStat(0);
   legend->Draw();
-  c1->SaveAs("ControlPlots/"+idir+"/NN_output/"+varname+"_"+tmass+".png");
-  c1->SaveAs("ControlPlots/"+idir+"/NN_output/"+varname+"_"+tmass+".root");
+
+  string imagePath = "ControlPlots/"+idir+"/NN_output/"+varname.Data() + (tmass!="" ? "_"+tmass : "");
+
+  c1->SaveAs((imagePath+".png" ).data());
+  c1->SaveAs((imagePath+".root").data());
 
   if (not (norm2yield and varname=="pSignal")) return;
 
@@ -237,7 +239,6 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
 
   for (auto mass : masses) {
     if      (mass==0 ) continue;
-    else if (mass>500) continue;
 
     auto significance = get_significance_hist(hists[mass],hists[0],sf);
     if (mass==200) significance->SetMaximum(significance->GetBinContent( significance->GetMaximumBin() )*2);//significance->SetMaximum(10);
