@@ -124,7 +124,7 @@ TH1F* get_hist(int mass,TString phys_model="GM") {
   return hist;
 }
 
-float AMS(float s, float b, bool debug=true) {
+float AMS(float s, float b, bool debug=false) {
 
   if (s<=0 or b<=0) return 0;
 
@@ -164,7 +164,7 @@ TH1F* get_significance_hist(TH1F* h_sig, TH1F* h_bkg, float sf) {
 
 }
 
-void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool norm2yield=false, TString phys_model="GM") {
+void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool norm2yield=true, TString phys_model="GM") {
   idir = dir;
   tmass = name;
   sdir  = idir+tmass;
