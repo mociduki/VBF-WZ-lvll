@@ -17,20 +17,39 @@ string idir  = "0630/";
 string tmass = "m900";
 string sdir  = idir+tmass;
 
-string get_file_name(int mass) {
+string get_file_name(int mass, string phys_model="GM") {
   
   string insert_str="main";
-  string              file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450765_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m200_ntuples.root";
-  if      (mass==250) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450766_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m250_ntuples.root";
-  else if (mass==300) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450767_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m300_ntuples.root";
-  else if (mass==350) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450768_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m350_ntuples.root";
-  else if (mass==400) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450769_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m400_ntuples.root";
-  else if (mass==450) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450770_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m450_ntuples.root";
-  else if (mass==500) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450771_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m500_ntuples.root";
-  else if (mass==600) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450772_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m600_ntuples.root";
-  else if (mass==700) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450773_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m700_ntuples.root";
-  else if (mass==800) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.450774_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m800_ntuples.root";
-  else if (mass==900) file_path="OutputRoot/"+sdir+"/new_GM_"+insert_str+"MVA.305035_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_900_qcd0_ntuples.root";
+  string              file_path="OutputRoot/"+sdir+"/new_"+phys_model+"_"+insert_str;
+  if      (mass==200) file_path+="MVA.450765_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m200_ntuples.root";
+  else if (mass==250) file_path+="MVA.450766_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m250_ntuples.root";
+  else if (mass==300) file_path+="MVA.450767_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m300_ntuples.root";
+  else if (mass==350) file_path+="MVA.450768_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m350_ntuples.root";
+  else if (mass==400) file_path+="MVA.450769_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m400_ntuples.root";
+  else if (mass==450) file_path+="MVA.450770_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m450_ntuples.root";
+  else if (mass==500) file_path+="MVA.450771_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m500_ntuples.root";
+  else if (mass==600) file_path+="MVA.450772_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m600_ntuples.root";
+  else if (mass==700) file_path+="MVA.450773_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m700_ntuples.root";
+  else if (mass==800) file_path+="MVA.450774_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m800_ntuples.root";
+  else if (mass==900) file_path+="MVA.305035_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_900_qcd0_ntuples.root";
+
+  if (phys_model=="HVT") {
+    file_path="OutputRoot/"+sdir+"/new_"+phys_model+"_"+insert_str;
+    if      (mass== 250) file_path+="MVA.307730_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0250_ntuples.root";
+    else if (mass== 300) file_path+="MVA.307731_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0300_ntuples.root";
+    else if (mass== 350) file_path+="MVA.309528_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0350_ntuples.root";
+    else if (mass== 400) file_path+="MVA.307732_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0400_ntuples.root";
+    else if (mass== 450) file_path+="MVA.309529_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0450_ntuples.root";
+    else if (mass== 500) file_path+="MVA.307733_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0500_ntuples.root";
+    else if (mass== 600) file_path+="MVA.307734_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0600_ntuples.root";
+    else if (mass== 700) file_path+="MVA.307735_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0700_ntuples.root";
+    else if (mass== 800) file_path+="MVA.307736_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0800_ntuples.root";
+    else if (mass== 900) file_path+="MVA.307737_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m0900_ntuples.root";
+    else if (mass==1000) file_path+="MVA.307738_MGPy8EG_A14NNPDF23LO_vbfHVT_Agv1_VzWZ_lvll_m1000_ntuples.root";
+  }
+
+  bool warning= (phys_model=="GM" and mass==1000) or (phys_model=="HVT" and mass==200);
+  if (warning) {cout<<"phys_model: "<<phys_model<<" while mass= "<<mass<<". Aborting the process."<<endl; exit(1);}
 
   return file_path;
   
@@ -66,13 +85,13 @@ TString title, proj_str,select_weight;
 TString proj_option="";
 int nbins = 50; float xmin =0, xmax = 1;
 
-TH1F* get_bkg_hist() {
+TH1F* get_bkg_hist(TString phys_model="GM") {
 
   TChain* chain = new TChain("nominal");
   TString ins_str="main";
   //chain->Add("OutputRoot/new_GM_"+ins_str+"MVA.364253_Sherpa_222_NNPDF30NNLO_lllv_ntuples.root");
-  chain->Add("OutputRoot/"+sdir+"/new_GM_"+ins_str+"MVA.361292_MGaMcAtNloPy8EG_NNPDF30LO_A14NNPDF23LO_WZ_lvll_FxFx_ntuples.root");
-  chain->Add("OutputRoot/"+sdir+"/new_GM_"+ins_str+"MVA.364284_Sherpa_222_NNPDF30NNLO_lllvjj_EW6_ntuples.root");
+  chain->Add("OutputRoot/"+sdir+"/new_"+phys_model+"_"+ins_str+"MVA.361292_MGaMcAtNloPy8EG_NNPDF30LO_A14NNPDF23LO_WZ_lvll_FxFx_ntuples.root");
+  chain->Add("OutputRoot/"+sdir+"/new_"+phys_model+"_"+ins_str+"MVA.364284_Sherpa_222_NNPDF30NNLO_lllvjj_EW6_ntuples.root");
 
   TH1F* hist = new TH1F("bkg",title,nbins,xmin,xmax);
   chain->Project(hist->GetName(),proj_str,select_weight,proj_option);
@@ -80,11 +99,11 @@ TH1F* get_bkg_hist() {
   return hist;
 }
 
-TH1F* get_hist(int mass) {
+TH1F* get_hist(int mass,TString phys_model="GM") {
 
   TH1F* hist;
   if (mass>0) {
-    string fname=get_file_name(mass);
+    string fname=get_file_name(mass,phys_model);
     
     TFile* f = TFile::Open(fname.data(),"read");
     TTree* t = (TTree*)f->Get("nominal");
@@ -95,7 +114,7 @@ TH1F* get_hist(int mass) {
     hist = new TH1F(histName ,title,nbins,xmin,xmax);
     t->Project(hist->GetName(),proj_str,select_weight,proj_option);
   }
-  else hist = get_bkg_hist();
+  else hist = get_bkg_hist(phys_model);
 
   hist->SetMaximum(hist->GetBinContent( hist->GetMaximumBin() )*7);
   hist->SetLineWidth(2);
@@ -144,7 +163,7 @@ TH1F* get_significance_hist(TH1F* h_sig, TH1F* h_bkg, float sf) {
 
 }
 
-void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool norm2yield=false) {
+void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool norm2yield=false, TString phys_model="GM") {
   idir = dir;
   tmass = name;
   sdir  = idir+tmass;
@@ -194,7 +213,7 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
   if (norm2yield) select_weight += "*WeightNormalized";
   else proj_option="norm"; //normalize to 1
 
-  vector<int> masses{0,200,300,400,500,600,700,800,900};
+  vector<int> masses{0,250,300,400,500,600,700,800,900};
 
   TCanvas* c1 = new TCanvas ("name", "title", 800, 600);
 
@@ -207,7 +226,7 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
   std::unordered_map<int,TH1F*> hists;
 
   for (auto mass : masses) {
-    TH1F* hist = get_hist(mass);
+    TH1F* hist = get_hist(mass,phys_model);
     hists[mass]=hist;
 
     TString option="same hist";
