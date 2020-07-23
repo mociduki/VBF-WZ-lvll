@@ -87,6 +87,7 @@ def read_data_apply(filepath, tr_files, Label, variables,model,apply_transform=T
 def read_data(filename,isSignal=False,isApplication=False):
     root = ROOT.TFile(filename)
     tree = root.Get('nominal')
+    cuts=''
     if not(isApplication):
         cuts='Jet1Pt>0&&Jet2Pt>0&&M_jj>100.'
         if isSignal: cuts+='&&abs(Weight)<10'
