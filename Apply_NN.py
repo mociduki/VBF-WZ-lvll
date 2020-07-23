@@ -15,7 +15,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 from keras.models import model_from_json
-from common_function import read_data_apply, calc_sig, prepare_data, f1, f1_loss
+from common_function import read_data_apply, calc_sig, f1, f1_loss
 import config_OPT_NN as conf
 from pathlib import Path
 
