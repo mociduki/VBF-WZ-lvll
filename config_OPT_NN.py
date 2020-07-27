@@ -29,7 +29,7 @@ class input_samples:
                   'MVA.450769_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m400_ntuples.root',
                   'MVA.450770_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m450_ntuples.root',
                   'MVA.450771_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m500_ntuples.root',
-                  'MVA.450772_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m600_ntuples.root',
+                  'MVA.450772_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m600_ntuples.root', #'MVA.305032_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_600_qcd0_ntuples.root',
                   'MVA.450773_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m700_ntuples.root',
                   'MVA.450774_MGaMcAtNloPy8EG_A14NNPDF23LO_vbfGM_sH05_H5pWZ_lvll_m800_ntuples.root',
                   'MVA.305035_MGPy8_A14NNPDF30NLO_VBS_H5p_lvll_900_qcd0_ntuples.root'
@@ -99,7 +99,8 @@ class apply_samples:
     # parse all files in the directory, except signals
     list_apply_bkg = []
 
-    shortList= [450765,450766,450767,450768,450769,450770,450771,450772,450773,450774,305035, #GM  sig
+    shortList= [450765,450766,450767,450768,450769,450770,450771,450772,450773,450774, #GM  sig
+                305032,305035,#305028,305029,305030,305031,305032,305033,305034,305035, #GM old, only include 600 & 900
                 307730,307731,307732,307733,307734,307735,307736,307737,307738,               #HVT sig
                 361292,364284]                                                                #WZ bkg
     #shortList=list() #uncomment when applying to all samples
