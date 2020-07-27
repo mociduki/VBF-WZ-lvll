@@ -100,6 +100,8 @@ TH1F* get_bkg_hist(TString phys_model="GM") {
   return hist;
 }
 
+float mfac=20;
+
 TH1F* get_hist(int mass,TString phys_model="GM") {
 
   TH1F* hist;
@@ -113,11 +115,13 @@ TH1F* get_hist(int mass,TString phys_model="GM") {
     //std::cout<<histName<<std::endl;
 
     hist = new TH1F(histName ,title,nbins,xmin,xmax);
+    select_weight+="*(abs(Weight)<10)";
     t->Project(hist->GetName(),proj_str,select_weight,proj_option);
   }
   else hist = get_bkg_hist(phys_model.Data());
 
-  hist->SetMaximum(hist->GetBinContent( hist->GetMaximumBin() )*7);
+  hist->SetMaximum(hist->GetBinContent( hist->GetMaximumBin() )*mfac);
+  hist->SetMinimum(1e-3);
   hist->SetLineWidth(2);
   hist->SetLineColor(get_color(mass));
   
@@ -164,13 +168,16 @@ TH1F* get_significance_hist(TH1F* h_sig, TH1F* h_bkg, float sf) {
 
 }
 
-void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool norm2yield=true, TString phys_model="GM") {
+void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool norm2yield=false, TString phys_model="GM") {
+
+  if (norm2yield) mfac=20;
+
   idir = dir;
   tmass = name;
   sdir  = idir+tmass;
 
-  if      (varname == "pSignal"     ) title="NN output : "+tmass, proj_str=varname, nbins = 50, xmin =0, xmax = 1;
-  else if (varname == "M_WZ"        ) title=varname, proj_str=varname, nbins = 50, xmin =0, xmax = 1500;
+  if      (varname == "pSignal"     ) title="NN output : "+tmass, proj_str=varname, nbins = 25, xmin =0, xmax = 1;
+  else if (varname == "M_WZ"        ) title=varname, proj_str=varname, nbins = 25, xmin =0, xmax = 1500;
   else if (varname == "M_jj"        ) title=varname, proj_str=varname, nbins = 50, xmin =0, xmax = 1500;
   else if (varname == "ZetaLep"     ) title=varname, proj_str=varname, nbins = 50, xmin =-3.5, xmax = 3.5;
   else if (varname == "DY_jj"       ) title=varname, proj_str=varname, nbins = 50, xmin =0, xmax = 10;
@@ -210,11 +217,11 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
   // Jet2Phi // Jet2Y           // M_Z
   // Jet3Phi // Jet3Y           
 
-  select_weight = "(M_jj>100&&abs(Weight)<10)";
+  select_weight = "(M_jj>100)";
   if (norm2yield) select_weight += "*WeightNormalized";
   else proj_option="norm"; //normalize to 1
 
-  vector<int> masses{0,250,300,400,500,600,700,800,900};
+  vector<int> masses{0,250,300,400,500,700,800,900};//600,
 
   TCanvas* c1 = new TCanvas ("name", "title", 800, 600);
 
@@ -246,7 +253,7 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
   gStyle->SetOptStat(0);
   legend->Draw();
 
-  string imagePath = "ControlPlots/"+idir+"/NN_output/"+varname.Data() + (tmass!="" ? "_"+tmass : "");
+  string imagePath = "ControlPlots/"+idir+"/"+varname.Data() + (tmass!="" ? "_"+tmass : "");
 
   c1->SaveAs((imagePath+".png" ).data());
   c1->SaveAs((imagePath+".root").data());
@@ -261,8 +268,10 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
     if      (mass==0 ) continue;
 
     auto significance = get_significance_hist(hists[mass],hists[0],sf);
-    if (mass<=250) significance->SetMaximum(significance->GetBinContent( significance->GetMaximumBin() )*2);//significance->SetMaximum(10);
-
+    if (mass<=250) {
+      significance->SetMaximum(significance->GetBinContent( significance->GetMaximumBin() )*2);//significance->SetMaximum(10);
+      //significance->SetMinimum(1e-2);
+    }
     TString option="same hist";
     if (mass==1) option="hist";
 
@@ -270,6 +279,11 @@ void nn_per_mass(string dir="", string name="",TString varname="pSignal",bool no
     
   }
   legend->Draw();
+
+  imagePath = "ControlPlots/"+idir+"/significance" + (tmass!="" ? "_"+tmass : "");
+
+  c2->SaveAs((imagePath+".png" ).data());
+  c2->SaveAs((imagePath+".root").data());
 
   return;
  
