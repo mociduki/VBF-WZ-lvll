@@ -444,8 +444,8 @@ def calc_sig_new(data_set, prob_predict_train, prob_predict_valid, file_string, 
         significance_tr=0
         significance_va=0
 
-        if Nsig_tr>0 and Nbkg_tr>0:significance_tr= AMS(Nsig_tr*nFold ,Nbkg_tr*nFold)
-        if Nsig_va>0 and Nbkg_va>0:significance_va= AMS(Nsig_va*nFold ,Nbkg_va*nFold)
+        if Nsig_tr>0 and Nbkg_tr>0:significance_tr= AMS(Nsig_tr, Nbkg_tr)# AMS(Nsig_tr*nFold ,Nbkg_tr*nFold)
+        if Nsig_va>0 and Nbkg_va>0:significance_va= AMS(Nsig_va, Nbkg_va)# AMS(Nsig_va*nFold ,Nbkg_va*nFold)
 
         if debug:
             print("Bin#\t",i)
