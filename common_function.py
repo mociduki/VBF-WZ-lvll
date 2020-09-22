@@ -36,8 +36,8 @@ def AMS(s, b):
     
     return significance
 
-def read_data_apply(filepath, tr_files, Label, variables,model,apply_transform=True,debug=False):
-    data = read_data(filepath,isApplication=True)
+def read_data_apply(filepath, tr_files, Label, variables,model,syst_var,apply_transform=True,debug=False):
+    data = read_data(filepath,isApplication=True,syst_var=syst_var)
 
     nFold=len(tr_files)
 
@@ -84,15 +84,16 @@ def read_data_apply(filepath, tr_files, Label, variables,model,apply_transform=T
     return data, X
 
 
-def read_data(filename,isSignal=False,isApplication=False):
+def read_data(filename,isSignal=False,isApplication=False,syst_var='nominal'):
     root = ROOT.TFile(filename)
-    tree = root.Get('nominal')
+    tree = root.Get(syst_var)
+
     cuts=''
     if not(isApplication):
         cuts='Jet1Pt>0&&Jet2Pt>0&&M_jj>100.'
         if isSignal: cuts+='&&abs(Weight)<10'
         pass
-    #else: no cut when applying
+    #else: no cut when applying/inferencing
 
     #KM: now the folding division is applied in the dataset class below
     #if nFold>1: cuts+='&&EventNumber%{0}!={1}'.format(nFold,Findex)
