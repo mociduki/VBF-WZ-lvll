@@ -1,5 +1,5 @@
 import numpy as np
-
+import os
 Filedir    = 'Inputs/MVA' #to change input dataset, change the link in the Inputs directory
 
 class input_samples:
@@ -86,11 +86,8 @@ class input_samples:
 
 #Contains list of samples to apply NN
 class apply_samples:
-    import os
-    # filedirdata= FiledirData
-    filedirapp = Filedir+"/"
-    filedirsig = filedirapp #+ 'new/signalsNew/mc16a/'
-
+    filedirapp=Filedir+"/"
+    
     # Signal files
     list_apply_sigGM = input_samples.sigGM['name']
 
@@ -99,11 +96,13 @@ class apply_samples:
     # parse all files in the directory, except signals
     list_apply_bkg = []
 
-    shortList= [450765,450766,450767,450768,450769,450770,450771,450772,450773,450774, #GM  sig
-                305032,305035,#305028,305029,305030,305031,305032,305033,305034,305035, #GM old, only include 600 & 900
-                307730,307731,307732,307733,307734,307735,307736,307737,307738,               #HVT sig
-                361292,364284]                                                                #WZ bkg
-    #shortList=list() #uncomment when applying to all samples
+    shortList= [450765,450766,450767,450768,450769,450770,450771,450772,450773,450774]
+#    shortList= [450765,450766,450767,450768,450769,450770,450771,450772,450773,450774, #GM  sig
+#                305032,305035,#305028,305029,305030,305031,305032,305033,305034,305035, #GM old, only include 600 & 900
+#                307730,307731,307732,307733,307734,307735,307736,307737,307738,               #HVT sig
+#                361292,364284]                                                                #WZ bkg
+    useShortList=True
+    if not useShortList: shortList=list()
     
     for r,d,f in os.walk(filedirapp):
         #print(f)
