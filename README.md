@@ -2,52 +2,6 @@
 
 This training framework is made for A WZ->lvll VBS resonance selection using neural networks/BDT.
 
-## Running the training
-The example below trains a model for a single mass point at 200 GeV and saves the control plots in a subdirectory ControlPlots/m200
-```
-python3 OPT_VBS_NN.py --mass_points 200 --model GM --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex 0 --nFold 4 --sdir m200
-```
-
-This next example trains 4 folds for mass points 200 and 300 individually, saving each plots and models seperately
-```
-for mass in 200 300
-do
-    for n in 0 1 2 3
-    do
-        sdir="m"$mass"-"$n
-        python3 OPT_VBS_NN.py --mass_points $mass --model GM --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex $n --nFold 4 --sdir 0630/$sdir
-    done
-done
-```
-
-## Applying the model
-The example below applies the model and creates new .root ntuples for one fold trained at 200 GeV, saving the results in a subdirectory of OutputRoot 
-```
-python3 Apply_NN.py --input sigvalid_GM_m[200]_S13.738_CVp0.312000_F0o4_NN.h5 --sdir 0630/m200
-```
-
-To apply 4 folds, simply add the file names to the input.
-
-This next example applies each model and folds, and creates new ntuples for masses 200 and 300 individually, assuming 4 folds have been trained already. 
-```
-for mass in 200 300
-do
-    input=""
-    for path in OutputModel/sigvalid_GM_m[$mass*
-    do
-        model=${path##*/}
-        input+=$model","
-    done
-    python3 Apply_NN.py --input ${input%?} --sdir 0630/m$mass
-done
-```
-
-## Plotting some results
-Using the example below, figures are created showing the result of the training for the signal, and the EW and QCD background, as well as the integrals of these curves depending on the cut value. One must first edit the location of the files within the code itself and check that the main for-loop runs over existing mass files. 
-```
-root -l pSignal_cv_plotting.C
-```
-
 ## How to download & initial setup
 ```
 git clone https://github.com/mociduki/VBF-WZ-lvll.git VBF-WZ-lvll_test
@@ -119,6 +73,52 @@ The NN prediction is applied on samples in the input directory (Inputs/MVA).
 The new samples with NN output are created under a directory called OutputRoot.
 The new samples have the identical set of variables as before, but have this additional variable: pSignal, which is a predicted probability to be a signal.
 These ntuples/samples can then be used to select the optimal cut on the NN output.
+
+## Running the training
+The example below trains a model for a single mass point at 200 GeV and saves the control plots in a subdirectory ControlPlots/m200
+```
+python3 OPT_VBS_NN.py --mass_points 200 --model GM --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex 0 --nFold 4 --sdir m200
+```
+
+This next example trains 4 folds for mass points 200 and 300 individually, saving each plots and models seperately
+```
+for mass in 200 300
+do
+    for n in 0 1 2 3
+    do
+        sdir="m"$mass"-"$n
+        python3 OPT_VBS_NN.py --mass_points $mass --model GM --booldropout=1 --dropout=0.20 --lr=0.013 --patience=18 --numn=10 --numlayer=3 --epochs=100 --Findex $n --nFold 4 --sdir 0630/$sdir
+    done
+done
+```
+
+## Applying the model
+The example below applies the model and creates new .root ntuples for one fold trained at 200 GeV, saving the results in a subdirectory of OutputRoot 
+```
+python3 Apply_NN.py --input sigvalid_GM_m[200]_S13.738_CVp0.312000_F0o4_NN.h5 --sdir 0630/m200
+```
+
+To apply 4 folds, simply add the file names to the input.
+
+This next example applies each model and folds, and creates new ntuples for masses 200 and 300 individually, assuming 4 folds have been trained already. 
+```
+for mass in 200 300
+do
+    input=""
+    for path in OutputModel/sigvalid_GM_m[$mass*
+    do
+        model=${path##*/}
+        input+=$model","
+    done
+    python3 Apply_NN.py --input ${input%?} --sdir 0630/m$mass
+done
+```
+
+## Plotting some results
+Using the example below, figures are created showing the result of the training for the signal, and the EW and QCD background, as well as the integrals of these curves depending on the cut value. One must first edit the location of the files within the code itself and check that the main for-loop runs over existing mass files. 
+```
+root -l pSignal_cv_plotting.C
+```
 
 <!---
 # Run BDT training and application (obsolete, left only for reference)
