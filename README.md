@@ -74,6 +74,8 @@ The new samples with NN output are created under a directory called OutputRoot.
 The new samples have the identical set of variables as before, but have this additional variable: pSignal, which is a predicted probability to be a signal.
 These ntuples/samples can then be used to select the optimal cut on the NN output.
 
+# Working examples
+
 ## Running the training
 The example below trains a model for a single mass point at 200 GeV and saves the control plots in a subdirectory ControlPlots/m200
 ```
